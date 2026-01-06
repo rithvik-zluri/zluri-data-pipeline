@@ -14,7 +14,7 @@ PostgreSQL was selected because:
 
 It provides strong referential integrity using foreign keys
 
-It supports complex joins required for group hierarchy resolution
+It supports complex joins required for group hierarchy resolution.
 
 It enables efficient analytical queries on transaction data
 
