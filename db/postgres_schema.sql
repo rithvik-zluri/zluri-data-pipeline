@@ -111,3 +111,9 @@ CREATE TABLE IF NOT EXISTS agent_details (
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS agent_role_mapping (
+    agent_id BIGINT REFERENCES agents(agent_id),
+    role_id BIGINT REFERENCES roles(role_id),
+    PRIMARY KEY (agent_id, role_id)
+);
