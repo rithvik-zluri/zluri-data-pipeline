@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS agent_role_mapping;
+DROP TABLE IF EXISTS agent_details;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS cards;
+DROP TABLE IF EXISTS budgets;
+DROP TABLE IF EXISTS agent_group_membership;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS admin_groups;
+DROP TABLE IF EXISTS agents;

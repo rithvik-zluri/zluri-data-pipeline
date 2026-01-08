@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS roles (
 -- BUDGETS
 -- =========================
 CREATE TABLE IF NOT EXISTS budgets (
-    budget_id BIGINT PRIMARY KEY,
+    budget_id TEXT PRIMARY KEY,
     name TEXT,
     amount NUMERIC,
     currency TEXT,
@@ -103,17 +103,26 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS agent_details (
     agent_id BIGINT PRIMARY KEY REFERENCES agents(agent_id),
     org_agent_id TEXT,
-    ticket_scope INT,
+    ticket_scope BIGINT,
     signature TEXT,
     freshchat_agent BOOLEAN,
-    availability JSONB,
-    contact JSONB,
+    is_active BOOLEAN,
+    avatar TEXT,
+    last_login_at TEXT,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
+
 
 CREATE TABLE IF NOT EXISTS agent_role_mapping (
     agent_id BIGINT REFERENCES agents(agent_id),
     role_id BIGINT REFERENCES roles(role_id),
     PRIMARY KEY (agent_id, role_id)
+);
+
+CREATE TABLE IF NOT EXISTS agent_availability (
+    agent_id BIGINT REFERENCES agents(agent_id),
+    is_available BOOLEAN,
+    available_since TEXT,
+    channel TEXT
 );
