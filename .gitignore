@@ -4,3 +4,14 @@ __pycache__/
 data/*
 .idea/
 .vscode/
+venv/
+*.
+*.pyc
+
+
+# Spark
+spark-warehouse/
+.metastore_db/
+
+# OS
+.DS_Store
