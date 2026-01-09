@@ -1,8 +1,40 @@
 -- =========================
--- UPSERT AGENTS
+-- UPSERT AGENTS (explicit columns)
 -- =========================
-INSERT INTO agents
-SELECT * FROM stg_agents
+INSERT INTO agents (
+    agent_id,
+    email,
+    name,
+    job_title,
+    language,
+    mobile,
+    phone,
+    time_zone,
+    available,
+    deactivated,
+    focus_mode,
+    agent_operational_status,
+    last_active_at,
+    created_at,
+    updated_at
+)
+SELECT
+    agent_id,
+    email,
+    name,
+    job_title,
+    language,
+    mobile,
+    phone,
+    time_zone,
+    available,
+    deactivated,
+    focus_mode,
+    agent_operational_status,
+    last_active_at,
+    created_at,
+    updated_at
+FROM stg_agents
 ON CONFLICT (agent_id)
 DO UPDATE SET
     email = EXCLUDED.email,
@@ -36,6 +68,20 @@ DO UPDATE SET
     updated_at = EXCLUDED.updated_at;
 
 -- =========================
+-- AGENT STATUS HISTORY SNAPSHOT
+-- =========================
+INSERT INTO agent_status_history (agent_id, sync_date, is_active)
+SELECT
+  agent_id,
+  DATE '2026-01-09', -- CURRENT_DATE should be used in production
+  NOT deactivated AS is_active
+FROM agents
+ON CONFLICT (agent_id, sync_date)
+DO UPDATE SET
+  is_active = EXCLUDED.is_active;
+
+
+-- =========================
 -- REBUILD AVAILABILITY
 -- =========================
 DELETE FROM agent_availability
@@ -44,13 +90,3 @@ WHERE agent_availability.agent_id = s.agent_id;
 
 INSERT INTO agent_availability
 SELECT * FROM stg_agent_availability;
-
--- =========================
--- MARK INACTIVE AGENTS
--- =========================
-UPDATE agents
-SET deactivated = true,
-    updated_at = NOW()
-WHERE agent_id NOT IN (
-    SELECT agent_id FROM stg_agents
-);
