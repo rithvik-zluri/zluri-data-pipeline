@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS agent_details (
     updated_at TIMESTAMP
 );
 
-CREATE TABLE agent_role_mapping (
+CREATE TABLE IF NOT EXISTS agent_role_mapping (
     agent_id BIGINT REFERENCES agents(agent_id),
     role_id BIGINT REFERENCES roles(role_id),
     status TEXT, -- 'assigned' or 'removed'
