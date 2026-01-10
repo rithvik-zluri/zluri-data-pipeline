@@ -1,6 +1,9 @@
 -- =========================
 -- UPSERT AGENTS (explicit columns)
 -- =========================
+-- =========================
+-- UPSERT AGENTS (explicit columns)
+-- =========================
 INSERT INTO agents (
     agent_id,
     email,
@@ -12,6 +15,7 @@ INSERT INTO agents (
     time_zone,
     available,
     deactivated,
+    status,
     focus_mode,
     agent_operational_status,
     last_active_at,
@@ -29,6 +33,7 @@ SELECT
     time_zone,
     available,
     deactivated,
+    status,
     focus_mode,
     agent_operational_status,
     last_active_at,
@@ -45,11 +50,13 @@ DO UPDATE SET
     phone = EXCLUDED.phone,
     time_zone = EXCLUDED.time_zone,
     available = EXCLUDED.available,
-    deactivated = EXCLUDED.deactivated,
+    deactivated = EXCLUDED.deactivated,   -- untouched logically, just passed through
+    status = EXCLUDED.status,             -- 🔥 THIS IS THE MISSING PIECE
     focus_mode = EXCLUDED.focus_mode,
     agent_operational_status = EXCLUDED.agent_operational_status,
     last_active_at = EXCLUDED.last_active_at,
     updated_at = EXCLUDED.updated_at;
+
 
 -- =========================
 -- UPSERT AGENT DETAILS
@@ -67,19 +74,22 @@ DO UPDATE SET
     last_login_at = EXCLUDED.last_login_at,
     updated_at = EXCLUDED.updated_at;
 
+
 -- =========================
 -- AGENT STATUS HISTORY SNAPSHOT
 -- =========================
 INSERT INTO agent_status_history (agent_id, sync_date, is_active)
 SELECT
-  agent_id,
-  DATE '2026-01-09', -- CURRENT_DATE should be used in production
-  NOT deactivated AS is_active
+    agent_id,
+    DATE '2026-01-10', -- use CURRENT_DATE in prod
+    CASE
+        WHEN status = 'active' THEN TRUE
+        ELSE FALSE
+    END AS is_active
 FROM agents
 ON CONFLICT (agent_id, sync_date)
 DO UPDATE SET
-  is_active = EXCLUDED.is_active;
-
+    is_active = EXCLUDED.is_active;
 
 -- =========================
 -- REBUILD AVAILABILITY

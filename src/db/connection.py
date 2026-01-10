@@ -1,4 +1,5 @@
 import psycopg2
+import os
 
 DB_CONFIG = {
     "host": "localhost",
@@ -26,3 +27,11 @@ def run_sql_file(file_path):
         raise
     finally:
         conn.close()
+
+def get_postgres_properties():
+    return {
+        "url": "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db",
+        "user": os.getenv("PG_USER", "rithvik_zluri_pipeline_user"),
+        "password": os.getenv("PG_PASSWORD", "rithvik_zluri_pipeline_pass"),
+        "driver": "org.postgresql.Driver"
+    }
