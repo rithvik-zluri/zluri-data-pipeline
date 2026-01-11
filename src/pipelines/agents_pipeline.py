@@ -1,8 +1,113 @@
+# src/pipelines/agents_pipeline.py
+
 import argparse
 import os
-from pyspark.sql.functions import col, lit, to_json, struct, when
+from pyspark.sql import functions as F
+from pyspark.sql.types import StructType, StructField, LongType
 from src.spark.spark_session import get_spark_session
 from src.utils.reader import DataReader
+
+
+def ensure_column(df, col_name, default_value=None):
+    """
+    If column does not exist in df, add it with default_value.
+    """
+    if col_name not in df.columns:
+        return df.withColumn(col_name, F.lit(default_value))
+    return df
+
+
+def transform_agents(agent_details_df, agents_df):
+    """
+    Core transformation logic for agents pipeline.
+    Returns: (final_agents_df, error_df)
+    """
+
+    # -------------------------------------------------
+    # 1. ERROR DETECTION – missing critical fields
+    # -------------------------------------------------
+    error_condition = (
+        F.col("id").isNull() |
+        F.col("contact.email").isNull() |
+        F.col("contact.name").isNull()
+    )
+
+    error_df = agent_details_df.filter(error_condition).select(
+        F.col("id").alias("agent_id"),
+        F.lit("MISSING_REQUIRED_FIELD").alias("error_type"),
+        F.lit("One or more required fields are null").alias("error_message"),
+        F.to_json(F.struct("*")).alias("raw_record")
+    )
+
+    # -------------------------------------------------
+    # 2. CLEAN DATA ONLY
+    # -------------------------------------------------
+    clean_df = agent_details_df.filter(~error_condition)
+
+    # -------------------------------------------------
+    # 3. SAFELY ADD OPTIONAL COLUMNS IF MISSING
+    # -------------------------------------------------
+    optional_columns = [
+        "available",
+        "deactivated",
+        "focus_mode",
+        "agent_operational_status",
+        "last_active_at",
+        "created_at",
+        "updated_at"
+    ]
+
+    for col_name in optional_columns:
+        clean_df = ensure_column(clean_df, col_name, None)
+
+    # -------------------------------------------------
+    # 4. ALL AGENTS (normalized)
+    # -------------------------------------------------
+    all_agents_df = clean_df.select(
+        F.col("id").cast("long").alias("agent_id"),
+        F.col("contact.email").alias("email"),
+        F.col("contact.name").alias("name"),
+        F.col("contact.job_title").alias("job_title"),
+        F.col("contact.language").alias("language"),
+        F.col("contact.mobile").alias("mobile"),
+        F.col("contact.phone").alias("phone"),
+        F.col("contact.time_zone").alias("time_zone"),
+        F.col("available"),
+        F.col("deactivated"),
+        F.col("focus_mode"),
+        F.col("agent_operational_status"),
+        F.col("last_active_at").cast("timestamp"),
+        F.col("created_at").cast("timestamp"),
+        F.col("updated_at").cast("timestamp")
+    )
+
+    # -------------------------------------------------
+    # 5. HANDLE EMPTY agents_df SAFELY
+    # -------------------------------------------------
+    if agents_df.rdd.isEmpty():
+        spark = agent_details_df.sparkSession
+        empty_schema = StructType([
+            StructField("agent_id", LongType(), True)
+        ])
+        active_agents_df = spark.createDataFrame([], empty_schema).withColumn("is_active", F.lit(True))
+    else:
+        active_agents_df = agents_df.select(
+            F.col("id").cast("long").alias("agent_id")
+        ).withColumn("is_active", F.lit(True))
+
+    # -------------------------------------------------
+    # 6. JOIN → DERIVE STATUS
+    # -------------------------------------------------
+    final_agents_df = all_agents_df.join(
+        active_agents_df,
+        on="agent_id",
+        how="left"
+    ).withColumn(
+        "status",
+        F.when(F.col("is_active").isNotNull(), F.lit("active")).otherwise(F.lit("inactive"))
+    ).drop("is_active")
+
+    return final_agents_df, error_df
 
 
 def run_agents_pipeline(day: str):
@@ -21,77 +126,10 @@ def run_agents_pipeline(day: str):
     print(f"Reading agents list from: {agents_path}")
     agents_df = reader.read(agents_path, file_format="json")
 
-    # -----------------------------------
-    # ERROR DETECTION – missing critical fields
-    # -----------------------------------
-    error_df = agent_details_df.filter(
-        col("id").isNull() |
-        col("contact.email").isNull() |
-        col("contact.name").isNull()
-    ).select(
-        col("id").alias("agent_id"),
-        lit("MISSING_REQUIRED_FIELD").alias("error_type"),
-        lit("One or more required fields are null").alias("error_message"),
-        to_json(struct("*")).alias("raw_record")
-    )
-
-    # -----------------------------------
-    # CLEAN DATA ONLY
-    # -----------------------------------
-    clean_df = agent_details_df.filter(
-        col("id").isNotNull() &
-        col("contact.email").isNotNull() &
-        col("contact.name").isNotNull()
-    )
-
-    # -----------------------------------
-    # ALL AGENTS (from agent_details)
-    # -----------------------------------
-    all_agents_df = clean_df.select(
-        col("id").cast("long").alias("agent_id"),
-        col("contact.email").alias("email"),
-        col("contact.name").alias("name"),
-        col("contact.job_title").alias("job_title"),
-        col("contact.language").alias("language"),
-        col("contact.mobile").alias("mobile"),
-        col("contact.phone").alias("phone"),
-        col("contact.time_zone").alias("time_zone"),
-        col("available"),
-        col("deactivated"),  # KEEP AS IS
-        col("focus_mode"),
-        col("agent_operational_status"),
-        col("last_active_at").cast("timestamp"),
-        col("created_at").cast("timestamp"),
-        col("updated_at").cast("timestamp")
-    )
-
-    print("All agents (from agent_details):")
-    all_agents_df.select("agent_id", "email").show(truncate=False)
-
-    # -----------------------------------
-    # ACTIVE AGENTS (from agents/*.json)
-    # -----------------------------------
-    active_agents_df = agents_df.select(
-        col("id").cast("long").alias("agent_id")
-    ).withColumn("is_active", lit(True))
-
-    print("Active agents (from agents list):")
-    active_agents_df.show(truncate=False)
-
-    # -----------------------------------
-    # JOIN → DERIVE STATUS
-    # -----------------------------------
-    final_agents_df = all_agents_df.join(
-        active_agents_df,
-        on="agent_id",
-        how="left"
-    ).withColumn(
-        "status",
-        when(col("is_active").isNotNull(), lit("active")).otherwise(lit("inactive"))
-    ).drop("is_active")
+    final_agents_df, error_df = transform_agents(agent_details_df, agents_df)
 
     print("Final Agents Preview (with status):")
-    final_agents_df.select("agent_id", "deactivated", "status").orderBy("agent_id").show(truncate=False)
+    final_agents_df.select("agent_id", "status").orderBy("agent_id").show(truncate=False)
 
     # -----------------------------------
     # WRITE TO POSTGRES (STAGING)
