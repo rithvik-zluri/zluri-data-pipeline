@@ -232,3 +232,40 @@ CREATE TABLE IF NOT EXISTS stg_agent_role_mapping (
     agent_id BIGINT,
     role_id BIGINT
 );
+
+-- =========================
+-- GROUP PIPELINE ERRORS
+-- =========================
+CREATE TABLE IF NOT EXISTS group_pipeline_errors (
+    id SERIAL PRIMARY KEY,
+    group_id BIGINT,
+    error_type TEXT,
+    error_message TEXT,
+    raw_record JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- ROLE PIPELINE ERRORS
+-- =========================
+CREATE TABLE IF NOT EXISTS role_pipeline_errors (
+    id SERIAL PRIMARY KEY,
+    role_id BIGINT,
+    error_type TEXT,
+    error_message TEXT,
+    raw_record JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- AGENT ROLE PIPELINE ERRORS
+-- =========================
+CREATE TABLE IF NOT EXISTS agent_role_pipeline_errors (
+    id SERIAL PRIMARY KEY,
+    agent_id BIGINT,
+    role_id BIGINT,
+    error_type TEXT,
+    error_message TEXT,
+    raw_record JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,5 +1,4 @@
-INSERT INTO roles (role_id, name, description, is_default, agent_type, created_at, updated_at)
-SELECT
+INSERT INTO roles (
     role_id,
     name,
     description,
@@ -7,6 +6,15 @@ SELECT
     agent_type,
     created_at,
     updated_at
+)
+SELECT
+    role_id,
+    name,
+    description,
+    is_default,
+    agent_type,
+    created_at::timestamp,
+    updated_at::timestamp
 FROM stg_roles
 ON CONFLICT (role_id) DO UPDATE
 SET

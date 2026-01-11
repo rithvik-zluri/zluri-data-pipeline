@@ -13,7 +13,9 @@ DO UPDATE SET
 -- =========================
 -- REFRESH MEMBERSHIP
 -- =========================
-DELETE FROM group_membership;
+DELETE FROM group_membership
+WHERE group_id IN (SELECT DISTINCT group_id FROM stg_group_membership);
+
 
 INSERT INTO group_membership (group_id, agent_id)
 SELECT group_id, agent_id
