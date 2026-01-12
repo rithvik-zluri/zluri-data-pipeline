@@ -1,7 +1,7 @@
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, LongType, StringType, IntegerType
-from src.pipelines.agent_roles_pipeline import transform_agent_roles
+from src.pipelines.agent_roles.agent_roles_pipeline import transform_agent_roles
 
 
 @pytest.fixture(scope="session")

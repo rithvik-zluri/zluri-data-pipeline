@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import (
     StructType, StructField, LongType, StringType, ArrayType
 )
-from src.pipelines.groups_pipeline import transform_groups
+from src.pipelines.groups.groups_pipeline import transform_groups
 
 
 # -----------------------------

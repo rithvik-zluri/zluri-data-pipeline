@@ -1,28 +1,16 @@
-# src/pipelines/agents_pipeline.py
+# src/pipelines/agents/agents_transform.py
 
-import argparse
-import os
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, LongType
-from src.spark.spark_session import get_spark_session
-from src.utils.reader import DataReader
 
 
 def ensure_column(df, col_name, default_value=None):
-    """
-    If column does not exist in df, add it with default_value.
-    """
     if col_name not in df.columns:
         return df.withColumn(col_name, F.lit(default_value))
     return df
 
 
 def transform_agents(agent_details_df, agents_df):
-    """
-    Core transformation logic for agents pipeline.
-    Returns: (final_agents_df, error_df)
-    """
-
     # -------------------------------------------------
     # 1. ERROR DETECTION – missing critical fields
     # -------------------------------------------------
@@ -104,63 +92,8 @@ def transform_agents(agent_details_df, agents_df):
         how="left"
     ).withColumn(
         "status",
-        F.when(F.col("is_active").isNotNull(), F.lit("active")).otherwise(F.lit("inactive"))
+        F.when(F.col("is_active").isNotNull(), F.lit("active"))
+         .otherwise(F.lit("inactive"))
     ).drop("is_active")
 
     return final_agents_df, error_df
-
-
-def run_agents_pipeline(day: str):
-    print(f"=== Starting agents pipeline for {day} ===")
-
-    spark = get_spark_session("agents-pipeline")
-    reader = DataReader(spark)
-
-    base_path = os.path.join("sample_data", f"sync-{day}")
-    agent_details_path = os.path.join(base_path, "agent_details")
-    agents_path = os.path.join(base_path, "agents")
-
-    print(f"Reading agent details from: {agent_details_path}")
-    agent_details_df = reader.read(agent_details_path, file_format="json")
-
-    print(f"Reading agents list from: {agents_path}")
-    agents_df = reader.read(agents_path, file_format="json")
-
-    final_agents_df, error_df = transform_agents(agent_details_df, agents_df)
-
-    print("Final Agents Preview (with status):")
-    final_agents_df.select("agent_id", "status").orderBy("agent_id").show(truncate=False)
-
-    # -----------------------------------
-    # WRITE TO POSTGRES (STAGING)
-    # -----------------------------------
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
-    db_properties = {
-        "user": "rithvik_zluri_pipeline_user",
-        "password": "rithvik_zluri_pipeline_pass",
-        "driver": "org.postgresql.Driver"
-    }
-
-    final_agents_df.write \
-        .mode("overwrite") \
-        .jdbc(jdbc_url, "stg_agents", properties=db_properties)
-
-    # -----------------------------------
-    # WRITE ERRORS
-    # -----------------------------------
-    error_count = error_df.count()
-    if error_count > 0:
-        error_df.write \
-            .mode("append") \
-            .jdbc(jdbc_url, "agent_pipeline_errors", properties=db_properties)
-
-    print(f"✅ Agents pipeline completed successfully for {day}")
-    print(f"⚠️ Error records written: {error_count}")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--day", required=True, help="sync day (e.g. day1, day2)")
-    args = parser.parse_args()
-
-    run_agents_pipeline(args.day)

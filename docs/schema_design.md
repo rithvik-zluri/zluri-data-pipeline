@@ -1,146 +1,313 @@
-Schema Design
+# Schema Design
 
-The schema is designed using PostgreSQL and follows normalization principles to avoid duplication and maintain data integrity.
+## Overview
 
-Entities and Tables
+This schema is designed using **PostgreSQL** and follows **normalization principles** to ensure:
+- No data duplication
+- High data integrity
+- Clear relationships between entities
+- Scalable analytics and reporting
 
-1. Agents
+The schema supports data coming from:
+- `sync-day1`
+- `sync-day2`
+- `tran` (transactional domain)
 
-Source:  
-- sync-day1/agents  
-- sync-day2/agents  
-- sync-day1/agent_details  
-- sync-day2/agent_details  
+It is divided into:
+1. **Core Entities (Week 1 Scope)**
+2. **Mapping & History Tables**
+3. **Future / Transactional Entities**
 
-Description:  
-The `agents` table stores core information about support agents such as name, email, availability, and operational status.
+---
 
-Primary Key: `agent_id`
+## Why PostgreSQL?
 
-Each agent represents a unique support user in the organization.
+PostgreSQL is chosen because:
+- Strong relational integrity support
+- Excellent performance for joins
+- Native support for `JSONB`
+- Industry standard for data engineering pipelines
 
-2. Agent Details
+---
 
-Source: 
-- sync-day1/agent_details  
-- sync-day2/agent_details  
+## 1. Agents
 
-Description:  
-The `agent_details` table stores extended and nested information about agents such as contact info, availability, and ticket scope.
+### Table: `agents`
 
-This table is separated from `agents` to keep the main table clean and normalized.
+**Source:**
+- `sync-day1/agents`
+- `sync-day2/agents`
+- `sync-day1/agent_details`
+- `sync-day2/agent_details`
 
-Relationship:
+**Description:**
+Stores core information about support agents such as:
+- name
+- email
+- availability
+- operational status
+- activation status
+
+**Primary Key:** `agent_id`
+
+Each row represents one unique support agent in the organization.
+
+**Why separate table?**
+This is the **central dimension table** used across all pipelines.
+
+---
+
+## 2. Agent Details
+
+### Table: `agent_details`
+
+**Source:**
+- `sync-day1/agent_details`
+- `sync-day2/agent_details`
+
+**Description:**
+Stores extended and nested information such as:
+- ticket scope
+- signature
+- avatar
+- last login
+- freshchat flags
+
+**Relationship:**
 One-to-one with `agents` using `agent_id`.
 
-3. Admin Groups
+**Why separate table?**
+To keep the main `agents` table clean and avoid excessive nullable columns.
 
-Source:
-- sync-day1/admin_groups  
-- sync-day2/admin_groups  
+---
 
-Description: 
-The `admin_groups` table stores organizational groups such as DevOps, IT Support, Hardware Procurement, etc.
+## 3. Groups (Admin Groups)
 
-Each group contains multiple agents.
+### Table: `groups`
 
-Primary Key: `group_id`
+**Source:**
+- `sync-day1/admin_groups`
+- `sync-day2/admin_groups`
 
-4. Agent Group Membership
+**Description:**
+Stores organizational groups like:
+- IT Support
+- DevOps
+- Hardware Procurement
 
-Source:
-- agent_ids array inside admin_groups JSON  
+Each group can contain multiple agents.
 
-Description:
-Since each group contains an array of agent IDs, a separate mapping table `agent_group_membership` is used to model the many-to-many relationship between agents and groups.
+**Primary Key:** `group_id`
 
-Primary Keys: (`agent_id`, `group_id`)
+---
 
-5. Roles
+## 4. Group Membership (Agent ↔ Group)
 
-Source: 
-- sync-day1/roles  
-- sync-day2/roles  
+### Table: `group_membership`
 
-Description:
-The `roles` table stores role definitions and permissions assigned to agents.
+**Source:**
+- `agent_ids` array inside `admin_groups` JSON
 
-Each role represents a specific access level or responsibility.
+**Description:**
+Represents the **many-to-many** relationship between agents and groups.
 
-6. Budgets
+One agent can belong to multiple groups, and one group can contain multiple agents.
 
-Source:
-- sync-day1/budgets  
-- sync-day2/budgets  
-- tran/budgets  
+**Composite Primary Key:**
+- (`group_id`, `agent_id`)
 
-Description: 
-The `budgets` table stores financial budget allocations.
+**Why mapping table?**
+Relational databases cannot store arrays for relationships efficiently.
+This table normalizes the relationship.
 
-Budgets can come from both sync and transactional domains.
+---
 
-A `source` column is used to identify the origin of the data.
+## 5. Roles
 
-7. Cards
+### Table: `roles`
 
-Source:  
-- sync-day1/cards  
-- sync-day2/cards  
-- tran/cards  
+**Source:**
+- `sync-day1/roles`
+- `sync-day2/roles`
 
-Description:
-The `cards` table stores corporate card information issued to agents.
+**Description:**
+Stores role definitions such as:
+- Admin
+- Approver
+- Requester
 
-Each card is linked to an agent.
+Each role defines permissions and responsibilities.
 
-8. Transactions
+**Primary Key:** `role_id`
 
-Source:
-- sync-day1/transactions  
-- sync-day2/transactions  
-- tran/transactions  
+---
 
-Description:
-The `transactions` table stores financial transactions performed using corporate cards.
+## 6. Agent ↔ Role Mapping
 
-Each transaction is linked to both:
-- an agent
-- a card
+### Table: `agent_role_mapping`
 
-Design Decisions
+**Description:**
+Stores current role assignments for agents.
 
-Why PostgreSQL?
-PostgreSQL is chosen because:
-- Strong support for relational data
-- Excellent handling of structured data
-- Supports JSONB for semi-structured fields
-- Widely used in data engineering pipelines
+Includes:
+- assignment status
+- assigned_at
+- removed_at
 
-Why Separate Tables?
-Data is separated into multiple tables to:
-- Avoid duplication
-- Improve data integrity
-- Support scalable joins and analytics
+---
 
-Why Mapping Table for Groups?
-Because one agent can belong to multiple groups and one group can have multiple agents, a many-to-many relationship exists.  
-This is handled using the `agent_group_membership` table.
+### Table: `agent_role_history`
 
-Why `source` Column?
-The `source` column helps track whether data came from:
-- sync-day1
-- sync-day2
-- tran
+**Description:**
+Audit table that tracks:
+- when roles were assigned
+- when roles were removed
 
-This enables:
-- historical comparisons
-- incremental processing
+Used for:
+- compliance
 - debugging
+- historical analysis
 
-Summary
+---
+
+## 7. Staging Tables
+
+### Tables:
+- `stg_agents`
+- `stg_agent_details`
+- `stg_groups`
+- `stg_group_membership`
+- `stg_roles`
+- `stg_agent_roles`
+
+**Description:**
+These are intermediate tables used by pipelines before loading into final tables.
+
+**Why staging?**
+- Safer writes
+- Easier debugging
+- Supports reprocessing
+
+---
+
+## 8. Error Tables
+
+### Tables:
+- `agent_pipeline_errors`
+- `group_pipeline_errors`
+- `role_pipeline_errors`
+- `agent_role_pipeline_errors`
+
+**Description:**
+Stores rejected or invalid records with:
+- error type
+- error message
+- raw JSON record
+
+**Why needed?**
+- Data quality tracking
+- Debugging source issues
+- Auditability
+
+---
+
+## 9. Budgets (Future Scope)
+
+### Table: `budgets`
+
+**Source:**
+- `sync-day1/budgets`
+- `sync-day2/budgets`
+- `tran/budgets`
+
+**Description:**
+Stores budget allocations and financial limits.
+
+Includes a `source` column to track origin.
+
+---
+
+## 10. Cards (Future Scope)
+
+### Table: `cards`
+
+**Source:**
+- `sync-day1/cards`
+- `sync-day2/cards`
+- `tran/cards`
+
+**Description:**
+Stores corporate card details issued to agents.
+
+Linked to:
+- `agents`
+- `budgets`
+
+---
+
+## 11. Transactions (Future Scope)
+
+### Table: `transactions`
+
+**Source:**
+- `sync-day1/transactions`
+- `sync-day2/transactions`
+- `tran/transactions`
+
+**Description:**
+Stores financial transactions made using cards.
+
+Linked to:
+- `cards`
+- `agents`
+
+---
+
+## 12. Agent Availability (Future Scope)
+
+### Table: `agent_availability`
+
+**Description:**
+Tracks real-time availability status per agent and channel.
+
+---
+
+## 13. Agent Status History
+
+### Table: `agent_status_history`
+
+**Description:**
+Maintains daily snapshot of agent active/inactive status.
+
+Used for:
+- trend analysis
+- reporting
+- audits
+
+---
+
+## Design Principles
+
+### Normalization
+- No duplicate data
+- Clear ownership of attributes
+
+### Scalability
+- Mapping tables for many-to-many
+- History tables for audit
+
+### Traceability
+- `source` column
+- error tables
+- history tables
+
+---
+
+## Summary
 
 This schema is designed to:
 - Cleanly represent all provided JSON data
 - Support scalable ETL pipelines
-- Maintain relational integrity
-- Handle future growth in data volume
+- Maintain strong relational integrity
+- Enable auditing and historical tracking
+- Be future-ready for transactional pipelines

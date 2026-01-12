@@ -1,7 +1,7 @@
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, LongType, StringType, BooleanType, IntegerType
-from src.pipelines.roles_pipeline import transform_roles
+from src.pipelines.roles.roles_pipeline import transform_roles
 
 
 @pytest.fixture(scope="session")
