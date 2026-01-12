@@ -189,25 +189,6 @@ Ensure both valid and invalid memberships are handled in same batch.
 
 ---
 
-## Why This Testing Strategy Is Good
-
-### 1. Business Logic Coverage
-We are testing **actual business rules**, not just code coverage.
-
-### 2. Data Quality Assurance
-We verify:
-- Missing fields
-- Invalid references
-- Mixed data scenarios
-
-### 3. Production-Ready Design
-The same transformation logic is used in:
-- Pipeline execution
-- Unit tests  
-So behavior is guaranteed to match.
-
----
-
 ## How This Fits in CI/CD
 
 In CI pipeline:
