@@ -60,16 +60,27 @@ CREATE TABLE IF NOT EXISTS roles (
 -- BUDGETS
 -- =========================
 CREATE TABLE IF NOT EXISTS budgets (
-    budget_id TEXT PRIMARY KEY,
-    budget_uuid TEXT,
-    name TEXT,
-    amount NUMERIC,
-    currency TEXT,
-    period TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    source TEXT
+  budget_id TEXT PRIMARY KEY,
+  budget_uuid TEXT,
+  name TEXT,
+  description TEXT,
+  retired BOOLEAN,
+  start_date DATE,
+  recurring_interval TEXT,
+  timezone TEXT,
+  limit_amount NUMERIC,
+  overspend_buffer NUMERIC,
+  assigned_amount NUMERIC,
+  spent_cleared NUMERIC,
+  spent_pending NUMERIC,
+  spent_total NUMERIC,
+  sync_day TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  source TEXT
 );
+
+
 
 -- =========================
 -- CARDS
@@ -267,5 +278,37 @@ CREATE TABLE IF NOT EXISTS agent_role_pipeline_errors (
     error_type TEXT,
     error_message TEXT,
     raw_record JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS stg_budgets (
+    budget_id TEXT,
+    budget_uuid TEXT,
+    name TEXT,
+    description TEXT,
+    retired BOOLEAN,
+    start_date DATE,
+    recurring_interval TEXT,
+    timezone TEXT,
+    limit_amount NUMERIC,
+    overspend_buffer NUMERIC,
+    assigned_amount NUMERIC,
+    spent_cleared NUMERIC,
+    spent_pending NUMERIC,
+    spent_total NUMERIC,
+    sync_day TEXT,
+    source TEXT,
+    ingested_at TIMESTAMP
+);
+
+
+
+CREATE TABLE IF NOT EXISTS budget_pipeline_errors (
+    id SERIAL PRIMARY KEY,
+    budget_id TEXT,
+    error_type TEXT,
+    error_message TEXT,
+    raw_record JSONB,
+    sync_day TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
