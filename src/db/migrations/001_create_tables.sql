@@ -88,16 +88,25 @@ CREATE TABLE IF NOT EXISTS budgets (
 CREATE TABLE IF NOT EXISTS cards (
     card_id TEXT PRIMARY KEY,
     card_uuid TEXT,
-    card_name TEXT,
-    card_type TEXT,
-    status TEXT,
-    agent_id TEXT,
+    name TEXT,
+    user_id TEXT,
+    user_uuid TEXT,
     budget_id TEXT,
+    budget_uuid TEXT,
     last_four TEXT,
     valid_thru TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    source TEXT
+    status TEXT,
+    type TEXT,
+    share_budget_funds BOOLEAN,
+    recurring BOOLEAN,
+    recurring_limit NUMERIC,
+    current_limit NUMERIC,
+    current_spent NUMERIC,
+    created_time TIMESTAMP,
+    updated_time TIMESTAMP,
+    last_synced_day TEXT,
+    source TEXT,
+    ingested_at TIMESTAMP
 );
 
 -- =========================
@@ -306,6 +315,39 @@ CREATE TABLE IF NOT EXISTS stg_budgets (
 CREATE TABLE IF NOT EXISTS budget_pipeline_errors (
     id SERIAL PRIMARY KEY,
     budget_id TEXT,
+    error_type TEXT,
+    error_message TEXT,
+    raw_record JSONB,
+    sync_day TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS stg_cards (
+    card_id TEXT PRIMARY KEY,
+    card_uuid TEXT,
+    name TEXT,
+    user_id TEXT,
+    user_uuid TEXT,
+    budget_id TEXT,
+    budget_uuid TEXT,
+    last_four TEXT,
+    valid_thru TEXT,
+    status TEXT,
+    type TEXT,
+    share_budget_funds BOOLEAN,
+    recurring BOOLEAN,
+    recurring_limit NUMERIC,
+    current_limit NUMERIC,
+    current_spent NUMERIC,
+    created_time TIMESTAMP,
+    updated_time TIMESTAMP,
+    sync_day TEXT,
+    source TEXT,
+    ingested_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS card_pipeline_errors (
+    card_id TEXT,
     error_type TEXT,
     error_message TEXT,
     raw_record JSONB,
