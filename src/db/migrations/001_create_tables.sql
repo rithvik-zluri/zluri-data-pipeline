@@ -3,6 +3,8 @@
 -- =========================
 CREATE TABLE IF NOT EXISTS agents (
     agent_id BIGINT PRIMARY KEY,
+
+    -- Contact fields
     email TEXT,
     name TEXT,
     job_title TEXT,
@@ -10,12 +12,23 @@ CREATE TABLE IF NOT EXISTS agents (
     mobile TEXT,
     phone TEXT,
     time_zone TEXT,
+
+    -- Availability / status
     available BOOLEAN,
-    deactivated BOOLEAN,          -- from source, keep as-is
-    status TEXT,                  -- NEW: 'active' / 'inactive' (derived)
+    available_since TIMESTAMP,
+    deactivated BOOLEAN,
+    status TEXT, -- derived: active / inactive
     focus_mode BOOLEAN,
     agent_operational_status TEXT,
     last_active_at TIMESTAMP,
+    last_login_at TIMESTAMP,
+
+    -- Org / metadata
+    org_agent_id TEXT,
+    ticket_scope BIGINT,
+    signature TEXT,
+    freshchat_agent BOOLEAN,
+
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
@@ -126,23 +139,6 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 
 
-
--- =========================
--- AGENT DETAILS
--- =========================
-CREATE TABLE IF NOT EXISTS agent_details (
-    agent_id BIGINT PRIMARY KEY REFERENCES agents(agent_id),
-    org_agent_id TEXT,
-    ticket_scope BIGINT,
-    signature TEXT,
-    freshchat_agent BOOLEAN,
-    is_active BOOLEAN,
-    avatar TEXT,
-    last_login_at TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS agent_role_mapping (
     agent_id BIGINT REFERENCES agents(agent_id),
     role_id BIGINT REFERENCES roles(role_id),
@@ -168,8 +164,6 @@ CREATE TABLE IF NOT EXISTS agent_role_history (
 -- STAGING TABLES
 -- =========================
 CREATE TABLE IF NOT EXISTS stg_agents (LIKE agents INCLUDING ALL);
-CREATE TABLE IF NOT EXISTS stg_agent_details (LIKE agent_details INCLUDING ALL);
-CREATE TABLE IF NOT EXISTS stg_agent_availability (LIKE agent_availability INCLUDING ALL);
 
 -- =========================
 -- AGENT STATUS HISTORY

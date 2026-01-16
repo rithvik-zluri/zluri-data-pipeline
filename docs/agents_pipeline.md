@@ -150,17 +150,21 @@ Store daily snapshots:
 | mobile                   | TEXT      | Mobile number                    |
 | phone                    | TEXT      | Phone number                     |
 | time_zone                | TEXT      | Time zone                        |
-| available                | BOOLEAN   | Availability flag                |
+| available                | BOOLEAN   | Availability flag                |           
+| available since          | TIMESTAMP | Availability status              |
 | deactivated              | BOOLEAN   | From source                      |
 | status                   | TEXT      | Derived: active/inactive         |
 | focus_mode               | BOOLEAN   | Focus mode                       |
 | agent_operational_status | TEXT      | Operational status               |
 | last_active_at           | TIMESTAMP | Last active time                 |
+| last_login_at            | TIMESTAMP | Last login time                  |
+| org_agent_id             | TEXT      | organization agent id            |
+| ticket_scope             | BIGINT    | ticket scope                     |
+| signature                | TEXT      | signature                        |
+| freshchat_agent          | BOOLEAN   | freshchat agent                  |
 | created_at               | TIMESTAMP | Created time                     |
 | updated_at               | TIMESTAMP | Updated time                     |
-| sync_day                 | TEXT      | day1/day2                        |
-| source                   | TEXT      | api                              |
-| ingested_at              | TIMESTAMP | Load time                        |
+
 
 
 #### `agents` (Final)

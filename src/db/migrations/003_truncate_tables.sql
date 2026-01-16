@@ -3,7 +3,6 @@ BEGIN;
 TRUNCATE TABLE
     agent_role_mapping,
     agent_role_history,
-    agent_availability,
     agent_status_history,
     agent_pipeline_errors,
     agent_role_pipeline_errors,
@@ -20,8 +19,6 @@ TRUNCATE TABLE
     transaction_pipeline_state,
 
     stg_agents,
-    stg_agent_details,
-    stg_agent_availability,
     stg_groups,
     stg_group_membership,
     stg_roles,
@@ -35,7 +32,6 @@ TRUNCATE TABLE
     cards,
     budgets,
 
-    agent_details,
     agents,
 
     roles,
