@@ -113,17 +113,40 @@ CREATE TABLE IF NOT EXISTS cards (
 -- TRANSACTIONS
 -- =========================
 CREATE TABLE IF NOT EXISTS transactions (
-    transaction_id BIGINT PRIMARY KEY,
-    card_id TEXT REFERENCES cards(card_id),
-    agent_id BIGINT REFERENCES agents(agent_id),
-    amount NUMERIC,
-    currency TEXT,
-    merchant TEXT,
-    category TEXT,
-    transaction_time TIMESTAMP,
-    status TEXT,
-    source TEXT
+    transaction_id TEXT PRIMARY KEY,
+    transaction_uuid TEXT,
+
+    occurred_time TIMESTAMP,
+    updated_time TIMESTAMP,
+
+    user_id TEXT,
+    user_uuid TEXT,
+    user_name TEXT,
+
+    merchant_name TEXT,
+    raw_merchant_name TEXT,
+
+    card_id TEXT,
+    card_uuid TEXT,
+
+    budget_id TEXT,
+    budget_uuid TEXT,
+
+    original_amount NUMERIC,
+    original_currency TEXT,
+
+    amount_usd NUMERIC,
+    exchange_rate NUMERIC,
+
+    idempotency_key TEXT UNIQUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
 
 -- =========================
 -- AGENT DETAILS
@@ -354,3 +377,52 @@ CREATE TABLE IF NOT EXISTS card_pipeline_errors (
     sync_day TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS stg_transactions (
+    transaction_id TEXT,
+    transaction_uuid TEXT,
+
+    occurred_time TIMESTAMP,
+    updated_time TIMESTAMP,
+
+    user_id TEXT,
+    user_uuid TEXT,
+    user_name TEXT,
+
+    merchant_name TEXT,
+    raw_merchant_name TEXT,
+
+    card_id TEXT,
+    card_uuid TEXT,
+
+    budget_id TEXT,
+    budget_uuid TEXT,
+
+    original_amount NUMERIC,
+    original_currency TEXT,
+
+    amount_usd NUMERIC,
+    exchange_rate NUMERIC,
+
+    idempotency_key TEXT,
+
+    raw_payload JSONB,
+    ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS transaction_pipeline_state (
+    pipeline_name TEXT PRIMARY KEY,
+    last_processed_time TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS transaction_pipeline_errors (
+    id SERIAL PRIMARY KEY,
+    transaction_id TEXT,
+    error_type TEXT,
+    error_message TEXT,
+    raw_record JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
