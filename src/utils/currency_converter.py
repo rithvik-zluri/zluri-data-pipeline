@@ -1,29 +1,70 @@
-# src/utils/currency_converter.py
-
+import os
 import requests
-from datetime import datetime
+from dotenv import load_dotenv
 
-EXCHANGE_RATE_API_KEY = "0b43ce96244c7c5d99a8bc88df6a3cf6"
-BASE_URL = "https://api.exchangerate.host"
+load_dotenv()
+
+API_KEY = os.getenv("EXCHANGE_RATE_API_KEY")
+BASE_URL = "https://api.exchangerate.host/historical"
+
+# In-memory cache: { "2022-01-01": { "USDINR": 74.5, ... } }
+_fx_cache = {}
 
 
-def get_exchange_rate(from_currency: str, to_currency: str, date: str) -> float:
+def fetch_historical_fx(date_str: str):
     """
-    date format: YYYY-MM-DD
+    Calls FX API.
+    Returns: quotes dict { 'USDINR': 74.5, ... }
     """
-    url = f"{BASE_URL}/{date}"
-    params = {
-        "base": from_currency,
-        "symbols": to_currency,
-        "access_key": EXCHANGE_RATE_API_KEY
-    }
+    if date_str in _fx_cache:
+        return _fx_cache[date_str]
 
-    response = requests.get(url, params=params, timeout=10)
-    response.raise_for_status()
+    if not API_KEY:
+        raise RuntimeError("❌ EXCHANGE_RATE_API_KEY not found in environment (.env)")
 
-    data = response.json()
+    url = f"{BASE_URL}?access_key={API_KEY}&date={date_str}"
 
-    if "rates" not in data or to_currency not in data["rates"]:
-        raise ValueError(f"Rate not found for {from_currency} -> {to_currency} on {date}")
+    try:
+        resp = requests.get(url, timeout=20)
+        data = resp.json()
 
-    return data["rates"][to_currency]
+        quotes = data.get("quotes")
+        if not quotes:
+            raise RuntimeError(f"No quotes in API response: {data}")
+
+        _fx_cache[date_str] = quotes
+        return quotes
+
+    except Exception as e:
+        print(f"⚠️ FX API failed for {date_str}: {e}")
+        _fx_cache[date_str] = None
+        return None
+
+
+def get_rate_to_usd(date_val, currency: str):
+    """
+    API gives: 1 USD = X currency  (USDINR = 74.5)
+    We return: currency -> USD = 1 / X
+    """
+    if currency == "USD":
+        return 1.0
+
+    if date_val is None or currency is None:
+        return None
+
+    date_str = date_val.strftime("%Y-%m-%d")
+
+    quotes = fetch_historical_fx(date_str)
+    if not quotes:
+        return None
+
+    key = f"USD{currency}"
+    rate = quotes.get(key)
+
+    if rate is None:
+        return None
+
+    try:
+        return 1.0 / float(rate)
+    except Exception:
+        return None
