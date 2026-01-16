@@ -46,7 +46,7 @@ def write_df_to_postgres(df, table_name):
 # MAIN PIPELINE
 # =========================
 
-def main(day: str):
+def run_transactions_pipeline(day: str):
     print("================================================")
     print(f"🚀 Starting Transactions Pipeline for {day}")
     print("================================================")
@@ -105,4 +105,4 @@ if __name__ == "__main__":
     parser.add_argument("--day", required=True, help="Day folder to process (e.g. day1)")
 
     args = parser.parse_args()
-    main(args.day)
+    run_transactions_pipeline(args.day)

@@ -20,28 +20,6 @@ CREATE TABLE IF NOT EXISTS agents (
     updated_at TIMESTAMP
 );
 
--- =========================
--- ADMIN GROUPS
--- =========================
-CREATE TABLE IF NOT EXISTS admin_groups (
-    group_id BIGINT PRIMARY KEY,
-    name TEXT,
-    description TEXT,
-    type TEXT,
-    allow_agents_to_change_availability BOOLEAN,
-    agent_availability_status BOOLEAN,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- =========================
--- AGENT ↔ GROUP
--- =========================
-CREATE TABLE IF NOT EXISTS agent_group_membership (
-    agent_id BIGINT REFERENCES agents(agent_id),
-    group_id BIGINT REFERENCES admin_groups(group_id),
-    PRIMARY KEY (agent_id, group_id)
-);
 
 -- =========================
 -- ROLES
@@ -185,15 +163,6 @@ CREATE TABLE IF NOT EXISTS agent_role_history (
     action_time TIMESTAMP DEFAULT NOW()
 );
 
--- =========================
--- AGENT AVAILABILITY
--- =========================
-CREATE TABLE IF NOT EXISTS agent_availability (
-    agent_id BIGINT REFERENCES agents(agent_id),
-    is_available BOOLEAN,
-    available_since TEXT,
-    channel TEXT
-);
 
 -- =========================
 -- STAGING TABLES

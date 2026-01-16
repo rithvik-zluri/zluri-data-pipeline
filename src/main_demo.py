@@ -5,6 +5,9 @@ from src.pipelines.agents.agents_pipeline import run_agents_pipeline
 from src.pipelines.roles.roles_pipeline import run_roles_pipeline
 from src.pipelines.agent_roles.agent_roles_pipeline import run_agent_roles_pipeline
 from src.pipelines.groups.groups_pipeline import run_groups_pipeline
+from src.pipelines.budgets.budgets_pipeline import run_budgets_pipeline
+from src.pipelines.cards.cards_pipeline import run_cards_pipeline
+from src.pipelines.transactions.transactions_pipeline import run_transactions_pipeline
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -15,61 +18,59 @@ def run_sql(relative_path: str):
     run_sql_file(str(full_path))
 
 
+def run_day(day: str):
+    print(f"\n==============================")
+    print(f"{day.upper()} SYNC START")
+    print("==============================")
+
+    # ----------------------------
+    # PHASE 1: CORE DIMENSIONS
+    # ----------------------------
+    run_agents_pipeline(day)
+    run_sql("db/migrations/010_upsert_agents.sql")
+
+    run_roles_pipeline(day)
+    run_sql("db/migrations/011_upsert_roles.sql")
+
+    run_agent_roles_pipeline(day)
+    run_sql("db/migrations/012_upsert_agent_roles.sql")
+
+    # ----------------------------
+    # PHASE 2: DEPENDENT ENTITIES
+    # ----------------------------
+    run_groups_pipeline(day)
+    run_sql("db/migrations/020_upsert_groups.sql")
+
+    run_budgets_pipeline(day)
+    run_sql("db/migrations/030_upsert_budgets.sql")
+
+    run_cards_pipeline(day)
+    run_sql("db/migrations/031_upsert_cards.sql")
+
+    run_transactions_pipeline(day)
+    run_sql("db/migrations/040_upsert_transactions.sql")
+
+    print(f"\n{day.upper()} SYNC COMPLETE")
+
+
 def run_full_demo():
     print("\n==============================")
     print("ZLURI DATA PIPELINE DEMO")
     print("==============================\n")
 
-    # 1. Create tables (safe)
     print("🛠️ Creating tables if not exist...")
     run_sql("db/migrations/001_create_tables.sql")
 
-    # 2. Skip truncate/reset (due to FK & permission issues)
     print("Skipping truncate/reset to avoid FK & permission issues")
 
-    # -------- DAY 1 SYNC --------
-    print("\n==============================")
-    print("DAY 1 SYNC START")
-    print("==============================")
+    # -------- DAY 1 --------
+    run_day("day1")
 
-    # --- Run pipelines (write to staging tables) ---
-    run_agents_pipeline("day1")
-    run_roles_pipeline("day1")
-    run_agent_roles_pipeline("day1")
-    run_groups_pipeline("day1")
-
-    # --- Upsert into final tables ---
-    print("\nUpserting DAY 1 data into final tables...")
-    run_sql("db/migrations/010_upsert_agents.sql")
-    run_sql("db/migrations/011_upsert_roles.sql")
-    run_sql("db/migrations/012_upsert_agent_roles.sql")
-    run_sql("db/migrations/020_upsert_groups.sql")
-
-    print("\nDAY 1 SYNC + UPSERT COMPLETE")
-
-    # -------- DAY 2 SYNC --------
-    print("\n==============================")
-    print("DAY 2 SYNC START")
-    print("==============================")
-
-    # --- Run pipelines (write to staging tables) ---
-    run_agents_pipeline("day2")
-    run_roles_pipeline("day2")
-    run_agent_roles_pipeline("day2")
-    run_groups_pipeline("day2")
-
-    # --- Upsert into final tables ---
-    print("\nUpserting DAY 2 data into final tables...")
-    run_sql("db/migrations/010_upsert_agents.sql")
-    run_sql("db/migrations/011_upsert_roles.sql")
-    run_sql("db/migrations/012_upsert_agent_roles.sql")
-    run_sql("db/migrations/020_upsert_groups.sql")
-
-    print("\nDAY 2 SYNC + UPSERT COMPLETE")
+    # -------- DAY 2 --------
+    run_day("day2")
 
     print("\n==============================")
     print("DEMO PIPELINE RUN FINISHED")
-    print("Final tables now reflect DAY 2 state via upserts")
     print("==============================\n")
 
 
