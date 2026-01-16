@@ -4,7 +4,8 @@ import pytest
 from unittest.mock import patch
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
-    StructType, StructField, StringType, LongType, IntegerType, DoubleType, ArrayType, TimestampType
+    StructType, StructField, StringType, LongType, IntegerType,
+    DoubleType, ArrayType
 )
 
 from src.pipelines.transactions.transactions_transform import transform_transactions
@@ -93,6 +94,7 @@ def test_api_rate_used(mock_get_rate, spark):
     assert row["original_amount"] == 10.0
     assert row["exchange_rate"] == 0.5
     assert row["amount_usd"] == 5.0
+    assert row["fx_source"] == "API"
     assert error_df.count() == 0
 
 
@@ -135,11 +137,12 @@ def test_payload_fallback_used(mock_get_rate, spark):
     assert row["original_amount"] == 20.0
     assert row["exchange_rate"] == 2.0
     assert row["amount_usd"] == 40.0
+    assert row["fx_source"] == "PAYLOAD"
     assert error_df.count() == 0
 
 
 # -------------------------------------------------------------------
-# 3. NO API + NO PAYLOAD (🔥 LINE 103 BRANCH)
+# 3. NO API + NO PAYLOAD
 # -------------------------------------------------------------------
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
 def test_no_api_and_no_payload_rate(mock_get_rate, spark):

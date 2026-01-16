@@ -34,8 +34,9 @@ WITH deduped AS (
 
         st.amount_usd,
         st.exchange_rate,
+        st.fx_source,
 
-        st.idempotency_key,                 -- 🔥 ADDED
+        st.idempotency_key,
         COALESCE(st.ingested_at, CURRENT_TIMESTAMP) AS ingested_at
     FROM stg_transactions st
     WHERE st.transaction_id IS NOT NULL
@@ -67,8 +68,9 @@ INSERT INTO transactions (
 
     amount_usd,
     exchange_rate,
+    fx_source,
 
-    idempotency_key,                      -- 🔥 ADDED
+    idempotency_key,
     ingested_at
 )
 SELECT
@@ -96,8 +98,9 @@ SELECT
 
     d.amount_usd,
     d.exchange_rate,
+    d.fx_source,
 
-    d.idempotency_key,                    -- 🔥 ADDED
+    d.idempotency_key,
     d.ingested_at
 FROM deduped d
 
@@ -125,8 +128,9 @@ DO UPDATE SET
 
     amount_usd         = EXCLUDED.amount_usd,
     exchange_rate      = EXCLUDED.exchange_rate,
+    fx_source          = EXCLUDED.fx_source,
 
-    idempotency_key    = EXCLUDED.idempotency_key,   -- 🔥 ADDED
+    idempotency_key    = EXCLUDED.idempotency_key,
     ingested_at        = EXCLUDED.ingested_at
 
 WHERE

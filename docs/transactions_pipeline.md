@@ -84,6 +84,7 @@ transactions (final table)
 | original_currency  | TEXT      | Original currency code          |
 | amount_usd         | NUMERIC   | Converted USD amount            |
 | exchange_rate      | NUMERIC   | FX rate used                    |
+| fx_source          | TEXT      | FX extracted from               |
 | raw_payload        | JSONB     | Full raw transaction record     |
 | ingested_at        | TIMESTAMP | Load time                       |
 
@@ -110,6 +111,7 @@ transactions (final table)
 | original_currency  | TEXT      | Original currency               |
 | amount_usd         | NUMERIC   | USD amount                      |
 | exchange_rate      | NUMERIC   | FX rate used                    |
+| fx_source          | TEXT      | FX extracted from               |
 | idempotency_key    | TEXT      | Unique hash for deduplication   |
 | created_at         | TIMESTAMP | Created time                    |
 | updated_at         | TIMESTAMP | Updated time                    |

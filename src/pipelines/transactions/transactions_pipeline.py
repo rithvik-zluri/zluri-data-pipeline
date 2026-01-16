@@ -69,6 +69,7 @@ def main(day: str):
         # -------------------------------------------------
         print("🔄 Transforming transactions...")
         valid_df, error_df, _ = transform_transactions(raw_df, day)
+        # ⬆️ pipeline_state_df is intentionally ignored
 
         # -------------------------------------------------
         # 3. Write valid records to staging

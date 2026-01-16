@@ -1,7 +1,12 @@
 # src/pipelines/transactions/transactions_transform.py
 
 from pyspark.sql import functions as F
-from pyspark.sql.types import DoubleType, StringType
+from pyspark.sql.types import (
+    DoubleType,
+    StringType,
+    StructType,
+    StructField
+)
 from src.utils.currency_converter import get_rate_to_usd
 
 
@@ -43,10 +48,10 @@ def transform_transactions(raw_df, day: str):
 
         F.col("txn.currencyData.originalCurrencyCode").alias("original_currency"),
 
-        # fallback rate from payload (already original -> USD)
+        # Payload fallback rate
         F.col("txn.currencyData.exchangeRate").cast(DoubleType()).alias("payload_exchange_rate"),
 
-        # raw JSON
+        # Raw JSON
         F.to_json(F.col("txn")).alias("raw_payload")
     )
 
@@ -74,55 +79,77 @@ def transform_transactions(raw_df, day: str):
     df = df.dropDuplicates(["idempotency_key"])
 
     # ---------------------------------------------------------
-    # FX LOOKUP (API FIRST, JSON FALLBACK)
+    # FX DATE
     # ---------------------------------------------------------
     df = df.withColumn("fx_date", F.to_date("occurred_time"))
 
+    # ---------------------------------------------------------
+    # PRE-COMPUTE FX MAP (API)
+    # ---------------------------------------------------------
     fx_pairs = df.select("fx_date", "original_currency").distinct().collect()
 
     fx_map = {}
     for r in fx_pairs:
-        date_val = r["fx_date"]
-        curr = r["original_currency"]
-        if date_val and curr:
-            rate = get_rate_to_usd(date_val, curr)
-            fx_map[(date_val, curr)] = rate
+        if r["fx_date"] and r["original_currency"]:
+            fx_map[(r["fx_date"], r["original_currency"])] = get_rate_to_usd(
+                r["fx_date"],
+                r["original_currency"]
+            )
 
     bc_fx = df.sparkSession.sparkContext.broadcast(fx_map)
 
-    def lookup_rate(date_val, currency_val, payload_rate):
-        # 1. Try API rate
+    # ---------------------------------------------------------
+    # FX UDF (API FIRST → PAYLOAD FALLBACK)
+    # ---------------------------------------------------------
+    def lookup_rate_and_source(date_val, currency_val, payload_rate):
         api_rate = bc_fx.value.get((date_val, currency_val))
+
         if api_rate is not None:
-            return api_rate
+            return api_rate, "API"
 
-        # 2. Fallback to JSON exchangeRate
         if payload_rate is not None:
-            return float(payload_rate)
+            return float(payload_rate), "PAYLOAD"
 
-        return None
+        return None, "MISSING"
 
-    fx_udf = F.udf(lookup_rate, DoubleType())
+    fx_schema = StructType([
+        StructField("exchange_rate", DoubleType(), True),
+        StructField("fx_source", StringType(), True)
+    ])
+
+    fx_udf = F.udf(lookup_rate_and_source, fx_schema)
 
     df = df.withColumn(
-        "exchange_rate",
+        "fx_struct",
         fx_udf("fx_date", "original_currency", "payload_exchange_rate")
     )
 
-    df = df.withColumn("amount_usd", F.col("original_amount") * F.col("exchange_rate"))
+    df = (
+        df.withColumn("exchange_rate", F.col("fx_struct.exchange_rate"))
+          .withColumn("fx_source", F.col("fx_struct.fx_source"))
+          .drop("fx_struct")
+    )
+
+    # ---------------------------------------------------------
+    # USD AMOUNT
+    # ---------------------------------------------------------
+    df = df.withColumn(
+        "amount_usd",
+        F.col("original_amount") * F.col("exchange_rate")
+    )
 
     # ---------------------------------------------------------
     # VALIDATIONS
     # ---------------------------------------------------------
     df = df.withColumn(
         "error_message",
-        F.when(F.col("transaction_id").isNull(), F.lit("transaction_id is null"))
-         .when(F.col("transaction_uuid").isNull(), F.lit("transaction_uuid is null"))
-         .when(F.col("occurred_time").isNull(), F.lit("occurred_time is null"))
-         .when(F.col("original_currency").isNull(), F.lit("original_currency is null"))
-         .when(F.col("original_amount").isNull(), F.lit("original_amount is null"))
-         .when(F.col("exchange_rate").isNull(), F.lit("exchange_rate not found (api + payload)"))
-         .otherwise(F.lit(None))
+        F.when(F.col("transaction_id").isNull(), "transaction_id is null")
+         .when(F.col("transaction_uuid").isNull(), "transaction_uuid is null")
+         .when(F.col("occurred_time").isNull(), "occurred_time is null")
+         .when(F.col("original_currency").isNull(), "original_currency is null")
+         .when(F.col("original_amount").isNull(), "original_amount is null")
+         .when(F.col("exchange_rate").isNull(), "exchange_rate not found (api + payload)")
+         .otherwise(None)
     )
 
     # ---------------------------------------------------------
@@ -152,6 +179,7 @@ def transform_transactions(raw_df, day: str):
         "original_currency",
         "amount_usd",
         "exchange_rate",
+        "fx_source",
         "idempotency_key",
         "raw_payload"
     )
@@ -167,7 +195,7 @@ def transform_transactions(raw_df, day: str):
     )
 
     # ---------------------------------------------------------
-    # PIPELINE STATE
+    # PIPELINE STATE (IMPORTANT)
     # ---------------------------------------------------------
     pipeline_state_df = df.select(
         F.lit("transactions").alias("pipeline_name"),

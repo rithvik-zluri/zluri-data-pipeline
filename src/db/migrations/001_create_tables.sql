@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
     amount_usd NUMERIC,
     exchange_rate NUMERIC,
+    fx_source TEXT NOT NULL, 
 
     idempotency_key TEXT UNIQUE,
 
@@ -403,6 +404,7 @@ CREATE TABLE IF NOT EXISTS stg_transactions (
 
     amount_usd NUMERIC,
     exchange_rate NUMERIC,
+    fx_source TEXT,
 
     idempotency_key TEXT,
 
