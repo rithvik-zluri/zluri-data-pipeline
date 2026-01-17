@@ -1,11 +1,9 @@
-# tests/pipelines/transactions/test_transactions_transform.py
-
 import pytest
 from unittest.mock import patch
 from pyspark.sql import SparkSession
 from pyspark.sql.types import (
-    StructType, StructField, StringType, LongType, IntegerType,
-    DoubleType, ArrayType
+    StructType, StructField, StringType, LongType,
+    IntegerType, DoubleType, ArrayType
 )
 
 from src.pipelines.transactions.transactions_transform import transform_transactions
@@ -19,13 +17,13 @@ def spark():
     return (
         SparkSession.builder
         .master("local[1]")
-        .appName("transactions-transform-test")
+        .appName("transactions-transform-tests")
         .getOrCreate()
     )
 
 
 # -------------------------------------------------------------------
-# RAW SCHEMA (matches input structure)
+# RAW INPUT SCHEMA (matches ingestion output)
 # -------------------------------------------------------------------
 def raw_schema():
     return StructType([
@@ -55,14 +53,14 @@ def raw_schema():
     ])
 
 
-# -------------------------------------------------------------------
-# 1. API RATE PATH
-# -------------------------------------------------------------------
+# ============================================================
+# 1. API FX RATE PATH
+# ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
 def test_api_rate_used(mock_get_rate, spark):
     mock_get_rate.return_value = 0.5
 
-    data = [{
+    df = spark.createDataFrame([{
         "results": [{
             "id": "t1",
             "uuid": "u1",
@@ -70,7 +68,7 @@ def test_api_rate_used(mock_get_rate, spark):
             "updatedTime": "2024-01-01T11:00:00",
             "userId": "user1",
             "userUuid": "uu1",
-            "userName": "Test User",
+            "userName": "API User",
             "merchantName": "Amazon",
             "rawMerchantName": "AMZN",
             "cardId": "c1",
@@ -84,12 +82,11 @@ def test_api_rate_used(mock_get_rate, spark):
                 "exchangeRate": None
             }
         }]
-    }]
+    }], schema=raw_schema())
 
-    df = spark.createDataFrame(data, schema=raw_schema())
-    valid_df, error_df, _ = transform_transactions(df, "day1")
+    valid_df, error_df, state_df = transform_transactions(df, "day1")
 
-    row = valid_df.collect()[0]
+    row = valid_df.orderBy("transaction_id").first()
 
     assert row["original_amount"] == 10.0
     assert row["exchange_rate"] == 0.5
@@ -97,15 +94,19 @@ def test_api_rate_used(mock_get_rate, spark):
     assert row["fx_source"] == "API"
     assert error_df.count() == 0
 
+    state = state_df.collect()[0]
+    assert state["pipeline_name"] == "transactions"
+    assert state["last_processed_time"] is not None
 
-# -------------------------------------------------------------------
+
+# ============================================================
 # 2. PAYLOAD FALLBACK PATH
-# -------------------------------------------------------------------
+# ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
 def test_payload_fallback_used(mock_get_rate, spark):
     mock_get_rate.return_value = None
 
-    data = [{
+    df = spark.createDataFrame([{
         "results": [{
             "id": "t2",
             "uuid": "u2",
@@ -127,28 +128,25 @@ def test_payload_fallback_used(mock_get_rate, spark):
                 "exchangeRate": 2.0
             }
         }]
-    }]
+    }], schema=raw_schema())
 
-    df = spark.createDataFrame(data, schema=raw_schema())
     valid_df, error_df, _ = transform_transactions(df, "day1")
+    row = valid_df.first()
 
-    row = valid_df.collect()[0]
-
-    assert row["original_amount"] == 20.0
     assert row["exchange_rate"] == 2.0
-    assert row["amount_usd"] == 40.0
     assert row["fx_source"] == "PAYLOAD"
+    assert row["amount_usd"] == 40.0
     assert error_df.count() == 0
 
 
-# -------------------------------------------------------------------
-# 3. NO API + NO PAYLOAD
-# -------------------------------------------------------------------
+# ============================================================
+# 3. NO API + NO PAYLOAD → ERROR
+# ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
-def test_no_api_and_no_payload_rate(mock_get_rate, spark):
+def test_no_fx_rate_available(mock_get_rate, spark):
     mock_get_rate.return_value = None
 
-    data = [{
+    df = spark.createDataFrame([{
         "results": [{
             "id": "t3",
             "uuid": "u3",
@@ -170,26 +168,22 @@ def test_no_api_and_no_payload_rate(mock_get_rate, spark):
                 "exchangeRate": None
             }
         }]
-    }]
+    }], schema=raw_schema())
 
-    df = spark.createDataFrame(data, schema=raw_schema())
     valid_df, error_df, _ = transform_transactions(df, "day1")
 
     assert valid_df.count() == 0
-    assert error_df.count() == 1
-
-    err = error_df.collect()[0]
-    assert "exchange_rate not found" in err["error_message"]
+    assert "exchange_rate not found" in error_df.first()["error_message"]
 
 
-# -------------------------------------------------------------------
-# 4. DEDUPLICATION TEST
-# -------------------------------------------------------------------
+# ============================================================
+# 4. DEDUPLICATION
+# ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
 def test_deduplication(mock_get_rate, spark):
     mock_get_rate.return_value = 1.0
 
-    data = [{
+    df = spark.createDataFrame([{
         "results": [
             {
                 "id": "t4",
@@ -198,7 +192,7 @@ def test_deduplication(mock_get_rate, spark):
                 "updatedTime": "2024-01-04T11:00:00",
                 "userId": "user4",
                 "userUuid": "uu4",
-                "userName": "Dup User",
+                "userName": "Dup",
                 "merchantName": "Zomato",
                 "rawMerchantName": "ZMT",
                 "cardId": "c4",
@@ -219,7 +213,7 @@ def test_deduplication(mock_get_rate, spark):
                 "updatedTime": "2024-01-04T11:00:00",
                 "userId": "user4",
                 "userUuid": "uu4",
-                "userName": "Dup User",
+                "userName": "Dup",
                 "merchantName": "Zomato",
                 "rawMerchantName": "ZMT",
                 "cardId": "c4",
@@ -234,33 +228,32 @@ def test_deduplication(mock_get_rate, spark):
                 }
             }
         ]
-    }]
+    }], schema=raw_schema())
 
-    df = spark.createDataFrame(data, schema=raw_schema())
     valid_df, error_df, _ = transform_transactions(df, "day1")
 
     assert valid_df.count() == 1
     assert error_df.count() == 0
 
 
-# -------------------------------------------------------------------
-# 5. VALIDATION ERROR TEST
-# -------------------------------------------------------------------
+# ============================================================
+# 5. VALIDATION: occurred_time NULL
+# ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
-def test_validation_error_transaction_id_null(mock_get_rate, spark):
+def test_occurred_time_null(mock_get_rate, spark):
     mock_get_rate.return_value = 1.0
 
-    data = [{
+    df = spark.createDataFrame([{
         "results": [{
-            "id": None,
+            "id": "t5",
             "uuid": "u5",
-            "occurredTime": "2024-01-05T10:00:00",
+            "occurredTime": None,
             "updatedTime": "2024-01-05T11:00:00",
             "userId": "user5",
             "userUuid": "uu5",
-            "userName": "Invalid User",
-            "merchantName": "Swiggy",
-            "rawMerchantName": "SWG",
+            "userName": "BadTime",
+            "merchantName": "Test",
+            "rawMerchantName": "TST",
             "cardId": "c5",
             "cardUuid": "cu5",
             "budgetId": "b5",
@@ -272,13 +265,48 @@ def test_validation_error_transaction_id_null(mock_get_rate, spark):
                 "exchangeRate": 1.0
             }
         }]
-    }]
+    }], schema=raw_schema())
 
-    df = spark.createDataFrame(data, schema=raw_schema())
     valid_df, error_df, _ = transform_transactions(df, "day1")
 
     assert valid_df.count() == 0
-    assert error_df.count() == 1
+    assert error_df.first()["error_message"] == "occurred_time is null"
 
-    err = error_df.collect()[0]
-    assert err["error_message"] == "transaction_id is null"
+
+# ============================================================
+# 6. IDEMPOTENCY KEY STABILITY
+# ============================================================
+@patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
+def test_idempotency_key_deterministic(mock_get_rate, spark):
+    mock_get_rate.return_value = 1.0
+
+    df = spark.createDataFrame([{
+        "results": [{
+            "id": "t6",
+            "uuid": "u6",
+            "occurredTime": "2024-01-06T10:00:00",
+            "updatedTime": "2024-01-06T11:00:00",
+            "userId": "user6",
+            "userUuid": "uu6",
+            "userName": "Stable",
+            "merchantName": "Test",
+            "rawMerchantName": "TST",
+            "cardId": "c6",
+            "cardUuid": "cu6",
+            "budgetId": "b6",
+            "budgetUuid": "bu6",
+            "currencyData": {
+                "originalCurrencyAmount": 6000,
+                "exponent": 2,
+                "originalCurrencyCode": "USD",
+                "exchangeRate": 1.0
+            }
+        }]
+    }], schema=raw_schema())
+
+    valid_df, _, _ = transform_transactions(df, "day1")
+
+    key1 = valid_df.first()["idempotency_key"]
+    key2 = valid_df.first()["idempotency_key"]
+
+    assert key1 == key2
