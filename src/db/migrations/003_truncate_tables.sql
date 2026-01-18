@@ -35,7 +35,7 @@ TRUNCATE TABLE
     agents,
 
     roles,
-
+    pipeline_metrics,
     groups;
 
 COMMIT;

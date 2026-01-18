@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import date
 
 from src.db.connection import run_sql_file
 from src.pipelines.agents.agents_pipeline import run_agents_pipeline
@@ -12,15 +13,22 @@ from src.pipelines.transactions.transactions_pipeline import run_transactions_pi
 BASE_DIR = Path(__file__).resolve().parent
 
 
+# =========================
+# SQL RUNNER (NO VARIABLES)
+# =========================
 def run_sql(relative_path: str):
     full_path = BASE_DIR / relative_path
     print(f"🗄️ Running SQL: {full_path}")
     run_sql_file(str(full_path))
 
 
-def run_day(day: str):
+# =========================
+# DAY RUNNER
+# =========================
+def run_day(day: str, sync_date: date):
     print(f"\n==============================")
     print(f"{day.upper()} SYNC START")
+    print(f"Logical sync date: {sync_date}")
     print("==============================")
 
     # ----------------------------
@@ -53,6 +61,9 @@ def run_day(day: str):
     print(f"\n{day.upper()} SYNC COMPLETE")
 
 
+# =========================
+# FULL DEMO
+# =========================
 def run_full_demo():
     print("\n==============================")
     print("ZLURI DATA PIPELINE DEMO")
@@ -64,10 +75,10 @@ def run_full_demo():
     print("Skipping truncate/reset to avoid FK & permission issues")
 
     # -------- DAY 1 --------
-    run_day("day1")
+    run_day("day1", sync_date=date(2024, 1, 1))
 
     # -------- DAY 2 --------
-    run_day("day2")
+    run_day("day2", sync_date=date(2024, 1, 2))
 
     print("\n==============================")
     print("DEMO PIPELINE RUN FINISHED")

@@ -391,3 +391,25 @@ CREATE TABLE IF NOT EXISTS transaction_pipeline_errors (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS pipeline_metrics (
+    id BIGSERIAL PRIMARY KEY,
+    flow_run_id TEXT,
+    task_name TEXT,
+    pipeline_name TEXT,
+    table_name TEXT,
+    day TEXT,
+
+    rows_inserted INT DEFAULT 0,
+    rows_updated INT DEFAULT 0,
+    rows_deleted INT DEFAULT 0,
+    rows_affected INT DEFAULT 0,
+
+    status TEXT,
+    error_message TEXT,
+
+    started_at TIMESTAMP,
+    finished_at TIMESTAMP,
+    duration_seconds NUMERIC,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
