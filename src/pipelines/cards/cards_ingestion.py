@@ -6,7 +6,18 @@ import os
 
 
 def read_cards_raw(reader: DataReader, day: str) -> DataFrame:
-    base_path = os.path.join("sample_data", f"sync-{day}", "cards")
+    """
+    Reads cards data for a given sync day.
+
+    Works with:
+    - Local paths (sample_data/...)
+    - S3 paths (s3a://...)
+    """
+
+    base_data_path = os.environ.get("DATA_BASE_PATH", "sample_data")
+
+    # Avoid os.path.join for S3 paths
+    base_path = f"{base_data_path}/sync-{day}/cards"
 
     print(f"Reading cards from: {base_path}")
 

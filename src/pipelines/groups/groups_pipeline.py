@@ -28,22 +28,14 @@ def run_groups_pipeline(day: str):
 
     agents_df = read_agents_from_db(spark, jdbc_url, db_props)
 
-    print("Loaded agents from DB:")
-    agents_df.show(truncate=False)
 
     # -----------------------------------
     # TRANSFORM
     # -----------------------------------
     groups_df, valid_membership_df, error_df = transform_groups(raw_df, agents_df)
 
-    print("Sample groups data:")
-    groups_df.show(truncate=False)
 
-    print("Valid membership records:")
-    valid_membership_df.show(truncate=False)
 
-    print("Invalid membership records:")
-    error_df.show(truncate=False)
 
     # -----------------------------------
     # WRITE stg_groups

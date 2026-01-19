@@ -20,8 +20,6 @@ def run_roles_pipeline(day: str):
     # -----------------------------
     final_df, error_df = transform_roles(roles_df)
 
-    print("Final Roles Preview:")
-    final_df.show(truncate=False)
 
     # -----------------------------------
     # WRITE TO POSTGRES (STAGING)

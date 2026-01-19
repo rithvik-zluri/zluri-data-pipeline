@@ -14,11 +14,7 @@ def run_agents_pipeline(day: str):
     # -----------------------------
     agent_details_df, agents_df = read_agents_data(spark, day)
 
-    print("Agent details schema:")
-    agent_details_df.printSchema()
 
-    print("Agents (active list) schema:")
-    agents_df.printSchema()
 
     # -----------------------------
     # TRANSFORM
@@ -28,8 +24,6 @@ def run_agents_pipeline(day: str):
         agents_df
     )
 
-    print("\nFinal Agents Preview:")
-    final_agents_df.orderBy("agent_id").show(truncate=False)
 
     # -----------------------------
     # WRITE TO POSTGRES (STAGING)

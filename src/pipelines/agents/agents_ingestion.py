@@ -3,11 +3,24 @@
 import os
 from src.utils.reader import DataReader
 
-def read_agents_data(spark, day: str):
-    base_path = os.path.join("sample_data", f"sync-{day}")
 
-    agent_details_path = os.path.join(base_path, "agent_details")
-    agents_path = os.path.join(base_path, "agents")
+def read_agents_data(spark, day: str):
+    """
+    Reads agents and agent_details data for a given day.
+
+    Works with:
+    - Local paths (sample_data/...)
+    - S3 paths (s3a://...)
+    """
+
+    # Base path can be local or S3
+    base_data_path = os.environ.get("DATA_BASE_PATH", "sample_data")
+
+    # IMPORTANT: do NOT use os.path.join for S3 paths
+    base_path = f"{base_data_path}/sync-{day}"
+
+    agent_details_path = f"{base_path}/agent_details"
+    agents_path = f"{base_path}/agents"
 
     reader = DataReader(spark)
 

@@ -20,8 +20,6 @@ def run_agent_roles_pipeline(day: str):
     # -----------------------
     agent_roles_df = transform_agent_roles(agents_df, roles_df)
 
-    print("Final Agent-Roles mapping preview:")
-    agent_roles_df.show(truncate=False)
 
     # -----------------------
     # Write to Postgres (staging)
