@@ -29,40 +29,42 @@ def zluri_day_pipeline(day: str):
     # ------------------
     # Core dimensions
     # ------------------
-    agents = agents_pipeline(day)
-    roles = roles_pipeline(day)
+    agents = agents_pipeline.submit(day)
+    roles = roles_pipeline.submit(day)
 
     # Upsert agents and roles after their respective pipelines are complete
-    agents_upsert = upsert_agents(day, wait_for=[agents])
-    roles_upsert = upsert_roles(day, wait_for=[roles])
+    agents_upsert = upsert_agents.submit(day, wait_for=[agents])
+    roles_upsert = upsert_roles.submit(day, wait_for=[roles])
 
     # ------------------
     # Agent ↔ Role mapping
     # ------------------
-    agent_roles = agent_roles_pipeline(day, wait_for=[agents_upsert, roles_upsert])
-    upsert_agent_roles(day, wait_for=[agent_roles])
+    agent_roles = agent_roles_pipeline.submit(day, wait_for=[agents_upsert, roles_upsert])
+    agent_roles_upsert = upsert_agent_roles.submit(day, wait_for=[agent_roles])
 
     # ------------------
     # Groups (WAIT for agents_upsert)
     # ------------------
-    groups = groups_pipeline(day, wait_for=[agents_upsert])
-    upsert_groups(day, wait_for=[groups])
+    groups = groups_pipeline.submit(day, wait_for=[agents_upsert])
+    groups_upsert = upsert_groups.submit(day, wait_for=[groups])
 
     # ------------------
     # Financial entities (budgets, cards)
     # ------------------
-    budgets = budgets_pipeline(day)
-    cards = cards_pipeline(day)
+    budgets = budgets_pipeline.submit(day)
+    cards = cards_pipeline.submit(day)
 
     # Upsert financial entities
-    upsert_budgets(day, wait_for=[budgets])
-    upsert_cards(day, wait_for=[cards])
+    budgets_upsert = upsert_budgets.submit(day, wait_for=[budgets])
+    cards_upsert = upsert_cards.submit(day, wait_for=[cards])
 
     # ------------------
     # Transactions
     # ------------------
-    transactions = transactions_pipeline(day, wait_for=[budgets, cards])
-    upsert_transactions(day, wait_for=[transactions])
+    transactions = transactions_pipeline.submit(day, wait_for=[budgets_upsert, cards_upsert])
+    transactions_upsert = upsert_transactions.submit(day, wait_for=[transactions])
+
+    transactions_upsert.result()
 
 
 # =========================

@@ -99,7 +99,7 @@ active_groups AS (
     FROM group_membership gm
     JOIN agents a
       ON gm.agent_id = a.agent_id
-    WHERE a.deactivated = false
+    WHERE a.status = 'active'
 ),
 
 groups_with_active_descendants AS (
