@@ -43,7 +43,7 @@ stg_agent_roles (staging table)
 012_upsert_agent_roles.sql
  ↓
 agent_role_mapping (final table)
-
+```
 ## Why Agent Roles Is a Separate Pipeline
 
 The **Roles Pipeline** handles:
