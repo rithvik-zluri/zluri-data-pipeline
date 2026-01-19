@@ -12,7 +12,7 @@ def generate_dag():
         sync_date=date(2026, 1, 19)
     )
 
-    print("✅ DAG visualization generated successfully")
+    print("DAG visualization generated successfully")
 
 
 if __name__ == "__main__":

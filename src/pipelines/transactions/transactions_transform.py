@@ -205,8 +205,8 @@ def transform_transactions(raw_df, day: str):
     # ---------------------------------------------------------
     # LOGS
     # ---------------------------------------------------------
-    print(f"📊 Total records  : {df.count()}")
-    print(f"✅ Valid records  : {valid_df.count()}")
-    print(f"❌ Error records  : {error_df.count()}")
+    print(f"Total records  : {df.count()}")
+    print(f"Valid records  : {valid_df.count()}")
+    print(f"Error records  : {error_df.count()}")
 
     return valid_df, error_df, pipeline_state_df

@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 
 def read_transactions(spark: SparkSession, day: str):
     base_path = os.path.join("sample_data", f"sync-{day}", "transactions")
-    print(f"📥 Reading transactions from: {base_path}")
+    print(f"Reading transactions from: {base_path}")
 
     df = (
         spark.read

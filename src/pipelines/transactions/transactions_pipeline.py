@@ -25,7 +25,7 @@ ERROR_TABLE = "transaction_pipeline_errors"
 
 def write_df_to_postgres(df, table_name):
     if df is None or df.rdd.isEmpty():
-        print(f"⚠️ Skipping write for {table_name}, dataframe is empty")
+        print(f"Skipping write for {table_name}, dataframe is empty")
         return
 
     (
@@ -39,7 +39,7 @@ def write_df_to_postgres(df, table_name):
         )
     )
 
-    print(f"✅ Written {df.count()} records to {table_name}")
+    print(f"Written {df.count()} records to {table_name}")
 
 
 # =========================
@@ -48,7 +48,7 @@ def write_df_to_postgres(df, table_name):
 
 def run_transactions_pipeline(day: str):
     print("================================================")
-    print(f"🚀 Starting Transactions Pipeline for {day}")
+    print(f"Starting Transactions Pipeline for {day}")
     print("================================================")
 
     spark = get_spark_session("transactions-pipeline")
@@ -57,39 +57,39 @@ def run_transactions_pipeline(day: str):
         # -------------------------------------------------
         # 1. Read raw data
         # -------------------------------------------------
-        print("📥 Reading raw transactions...")
+        print("Reading raw transactions...")
         raw_df = read_transactions(spark, day)
 
         if raw_df is None or raw_df.rdd.isEmpty():
-            print("⚠️ No raw data found. Exiting pipeline.")
+            print("No raw data found. Exiting pipeline.")
             return
 
         # -------------------------------------------------
         # 2. Transform
         # -------------------------------------------------
-        print("🔄 Transforming transactions...")
+        print("Transforming transactions...")
         valid_df, error_df, _ = transform_transactions(raw_df, day)
         # ⬆️ pipeline_state_df is intentionally ignored
 
         # -------------------------------------------------
         # 3. Write valid records to staging
         # -------------------------------------------------
-        print("💾 Writing valid records to stg_transactions...")
+        print("Writing valid records to stg_transactions...")
         write_df_to_postgres(valid_df, STG_TABLE)
 
         # -------------------------------------------------
         # 4. Write error records
         # -------------------------------------------------
-        print("💾 Writing error records to transaction_pipeline_errors...")
+        print("Writing error records to transaction_pipeline_errors...")
         write_df_to_postgres(error_df, ERROR_TABLE)
 
         print("================================================")
-        print(f"🎉 Transactions Pipeline completed successfully for {day}")
-        print("👉 Next step: run 040_upsert_transactions.sql")
+        print(f"Transactions Pipeline completed successfully for {day}")
+        print("Next step: run 040_upsert_transactions.sql")
         print("================================================")
 
     except Exception as e:
-        print(f"❌ Transactions Pipeline failed: {e}")
+        print(f"Transactions Pipeline failed: {e}")
         raise
 
     finally:

@@ -20,7 +20,7 @@ def fetch_historical_fx(date_str: str):
         return _fx_cache[date_str]
 
     if not API_KEY:
-        raise RuntimeError("❌ EXCHANGE_RATE_API_KEY not found in environment (.env)")
+        raise RuntimeError("EXCHANGE_RATE_API_KEY not found in environment (.env)")
 
     url = f"{BASE_URL}?access_key={API_KEY}&date={date_str}"
 
@@ -36,7 +36,7 @@ def fetch_historical_fx(date_str: str):
         return quotes
 
     except Exception as e:
-        print(f"⚠️ FX API failed for {date_str}: {e}")
+        print(f"FX API failed for {date_str}: {e}")
         _fx_cache[date_str] = None
         return None
 
