@@ -26,7 +26,7 @@ def read_groups_raw(reader: DataReader, day: str) -> DataFrame:
     return reader.read(base_path, "json")
 
 
-def read_agents_from_db(spark, jdbc_url: str, db_props: dict) -> DataFrame:
+def read_agents_from_db(spark, jdbc_url: str, db_properties: dict) -> DataFrame:
     """
     Reads agent IDs from the database.
     (Unchanged – DB access is independent of local/S3)
@@ -37,9 +37,9 @@ def read_agents_from_db(spark, jdbc_url: str, db_props: dict) -> DataFrame:
         .format("jdbc")
         .option("url", jdbc_url)
         .option("dbtable", "agents")
-        .option("user", db_props["user"])
-        .option("password", db_props["password"])
-        .option("driver", db_props["driver"])
+        .option("user", db_properties["user"])
+        .option("password", db_properties["password"])
+        .option("driver", db_properties["driver"])
         .load()
         .select(col("agent_id").cast("bigint").alias("agent_id"))
     )

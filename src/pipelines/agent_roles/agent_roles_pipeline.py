@@ -1,9 +1,10 @@
-# src/pipelines/agent_roles/agent_roles_pipeline.py
-
 import argparse
+
+from src.db.connection import get_postgres_properties
 from src.spark.spark_session import get_spark_session
 from src.pipelines.agent_roles.agent_roles_ingestion import read_agent_roles_inputs
 from src.pipelines.agent_roles.agent_roles_transform import transform_agent_roles
+
 
 def run_agent_roles_pipeline(day: str):
     print(f"=== Starting agent roles pipeline for {day} ===")
@@ -24,12 +25,8 @@ def run_agent_roles_pipeline(day: str):
     # -----------------------
     # Write to Postgres (staging)
     # -----------------------
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
-    db_properties = {
-        "user": "rithvik_zluri_pipeline_user",
-        "password": "rithvik_zluri_pipeline_pass",
-        "driver": "org.postgresql.Driver"
-    }
+    db_properties = get_postgres_properties()
+    jdbc_url = db_properties["url"]
 
     agent_roles_df.write \
         .mode("overwrite") \

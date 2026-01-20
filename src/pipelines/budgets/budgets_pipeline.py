@@ -1,8 +1,10 @@
 import argparse
-from src.spark.spark_session import get_spark_session
+
 from pyspark.sql.functions import col, explode, to_date, lit, current_timestamp
-from src.utils.reader import DataReader
+
 from src.db.connection import get_postgres_properties
+from src.spark.spark_session import get_spark_session
+from src.utils.reader import DataReader
 from src.pipelines.budgets.budgets_ingestion import read_budgets_raw
 from src.pipelines.budgets.budgets_transform import transform_budgets
 
@@ -13,8 +15,8 @@ def run_budgets_pipeline(day: str):
     spark = get_spark_session("budgets-pipeline")
     reader = DataReader(spark)
 
-    db_props = get_postgres_properties()
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
+    db_properties = get_postgres_properties()
+    jdbc_url = db_properties["url"]
 
     # ---------------------------
     # INGESTION
@@ -34,9 +36,9 @@ def run_budgets_pipeline(day: str):
             .format("jdbc") \
             .option("url", jdbc_url) \
             .option("dbtable", "stg_budgets") \
-            .option("user", db_props["user"]) \
-            .option("password", db_props["password"]) \
-            .option("driver", db_props["driver"]) \
+            .option("user", db_properties["user"]) \
+            .option("password", db_properties["password"]) \
+            .option("driver", db_properties["driver"]) \
             .load()
 
         valid_df = valid_df.join(
@@ -55,9 +57,9 @@ def run_budgets_pipeline(day: str):
         .format("jdbc") \
         .option("url", jdbc_url) \
         .option("dbtable", "stg_budgets") \
-        .option("user", db_props["user"]) \
-        .option("password", db_props["password"]) \
-        .option("driver", db_props["driver"]) \
+        .option("user", db_properties["user"]) \
+        .option("password", db_properties["password"]) \
+        .option("driver", db_properties["driver"]) \
         .mode("append") \
         .save()
 
@@ -71,9 +73,9 @@ def run_budgets_pipeline(day: str):
             .format("jdbc") \
             .option("url", jdbc_url) \
             .option("dbtable", "budget_pipeline_errors") \
-            .option("user", db_props["user"]) \
-            .option("password", db_props["password"]) \
-            .option("driver", db_props["driver"]) \
+            .option("user", db_properties["user"]) \
+            .option("password", db_properties["password"]) \
+            .option("driver", db_properties["driver"]) \
             .option("stringtype", "unspecified") \
             .mode("append") \
             .save()

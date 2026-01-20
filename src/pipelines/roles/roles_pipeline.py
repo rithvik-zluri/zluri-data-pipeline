@@ -1,9 +1,12 @@
 # src/pipelines/roles/roles_pipeline.py
 
 import argparse
+
+from src.db.connection import get_postgres_properties
 from src.spark.spark_session import get_spark_session
 from src.pipelines.roles.roles_ingestion import read_roles
 from src.pipelines.roles.roles_transform import transform_roles
+
 
 def run_roles_pipeline(day: str):
     print(f"=== Starting roles pipeline for {day} ===")
@@ -24,12 +27,8 @@ def run_roles_pipeline(day: str):
     # -----------------------------------
     # WRITE TO POSTGRES (STAGING)
     # -----------------------------------
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
-    db_properties = {
-        "user": "rithvik_zluri_pipeline_user",
-        "password": "rithvik_zluri_pipeline_pass",
-        "driver": "org.postgresql.Driver"
-    }
+    db_properties = get_postgres_properties()
+    jdbc_url = db_properties["url"]
 
     final_df.write \
         .mode("overwrite") \

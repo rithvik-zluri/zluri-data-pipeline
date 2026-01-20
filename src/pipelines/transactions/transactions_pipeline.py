@@ -1,19 +1,9 @@
 import argparse
+
+from src.db.connection import get_postgres_properties
 from src.spark.spark_session import get_spark_session
 from src.pipelines.transactions.transactions_ingestion import read_transactions
 from src.pipelines.transactions.transactions_transform import transform_transactions
-
-
-# =========================
-# POSTGRES CONFIG
-# =========================
-
-DB_URL = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
-DB_PROPERTIES = {
-    "user": "rithvik_zluri_pipeline_user",
-    "password": "rithvik_zluri_pipeline_pass",
-    "driver": "org.postgresql.Driver"
-}
 
 STG_TABLE = "stg_transactions"
 ERROR_TABLE = "transaction_pipeline_errors"
@@ -28,14 +18,15 @@ def write_df_to_postgres(df, table_name):
         print(f"Skipping write for {table_name}, dataframe is empty")
         return
 
+    db_properties = get_postgres_properties()
+
     (
-        df.write
-        .mode("append")
-        .option("stringtype", "unspecified")   # REQUIRED for JSONB
-        .jdbc(
-            url=DB_URL,
+        df.write.mode("append").option(
+            "stringtype", "unspecified"
+        ).jdbc(
+            url=db_properties["url"],
             table=table_name,
-            properties=DB_PROPERTIES
+            properties=db_properties,
         )
     )
 

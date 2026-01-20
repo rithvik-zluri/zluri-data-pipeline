@@ -43,8 +43,8 @@ def transform_cards(raw_df: DataFrame, day: str):
         get_json_object(card_json, "$.status").alias("status"),
         get_json_object(card_json, "$.type").alias("type"),
 
-        get_json_object(card_json, "$.shareBudgetFunds").alias("share_budget_funds"),
-        get_json_object(card_json, "$.recurring").alias("recurring"),
+        get_json_object(card_json, "$.shareBudgetFunds").cast("boolean").alias("share_budget_funds"),
+        get_json_object(card_json, "$.recurring").cast("boolean").alias("recurring"),
         get_json_object(card_json, "$.recurringLimit").cast("double").alias("recurring_limit"),
 
         get_json_object(card_json, "$.currentPeriod.limit").cast("double").alias("current_limit"),

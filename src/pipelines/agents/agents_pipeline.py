@@ -1,4 +1,6 @@
 import argparse
+
+from src.db.connection import get_postgres_properties
 from src.spark.spark_session import get_spark_session
 from src.pipelines.agents.agents_ingestion import read_agents_data
 from src.pipelines.agents.agents_transform import transform_agents
@@ -28,12 +30,8 @@ def run_agents_pipeline(day: str):
     # -----------------------------
     # WRITE TO POSTGRES (STAGING)
     # -----------------------------
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
-    db_properties = {
-        "user": "rithvik_zluri_pipeline_user",
-        "password": "rithvik_zluri_pipeline_pass",
-        "driver": "org.postgresql.Driver",
-    }
+    db_properties = get_postgres_properties()
+    jdbc_url = db_properties["url"]
 
     (
         final_agents_df.write

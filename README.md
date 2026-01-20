@@ -67,24 +67,24 @@ GRANT ALL PRIVILEGES ON DATABASE rithvik_zluri_pipeline_db TO rithvik_zluri_pipe
 ```
 ## Database Connection Properties
 
-You can use the following JDBC URL and properties to connect to the PostgreSQL database.
+All database connection details are now sourced from environment variables (typically via a `.env` file in the project root).
 
-```python
-# JDBC URL for the database
-jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
+Expected variables:
 
-# Database connection properties
-db_properties = {
-    "user": "rithvik_zluri_pipeline_user",
-    "password": "rithvik_zluri_pipeline_pass",
-    "driver": "org.postgresql.Driver",
-}
+```bash
+PG_HOST=localhost
+PG_PORT=5432
+PG_DB=rithvik_zluri_pipeline_db
+PG_USER=rithvik_zluri_pipeline_user
+PG_PASSWORD=rithvik_zluri_pipeline_pass
+PG_DRIVER=org.postgresql.Driver
+PG_JDBC_URL=jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db
 ```
-Usage Notes
 
-Make sure PostgreSQL is running locally on port 5432.
+Notes:
 
-The database rithvik_zluri_pipeline_db should exist, and the user rithvik_zluri_pipeline_user should have access.
+- Make sure PostgreSQL is running and these values match your local/remote DB.
+- Pipelines and DB utilities read these values via `src/db/connection.py` (`get_connection` and `get_postgres_properties`).
 
 ### Using S3 Data Path
 

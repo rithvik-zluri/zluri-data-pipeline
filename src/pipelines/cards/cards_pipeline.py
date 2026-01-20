@@ -1,10 +1,10 @@
-# src/pipelines/cards/cards_pipeline.py
-
 import argparse
+
 from pyspark.sql.functions import col
+
+from src.db.connection import get_postgres_properties
 from src.spark.spark_session import get_spark_session
 from src.utils.reader import DataReader
-from src.db.connection import get_postgres_properties
 from src.pipelines.cards.cards_ingestion import read_cards_raw
 from src.pipelines.cards.cards_transform import transform_cards
 
@@ -14,8 +14,8 @@ def run_cards_pipeline(day: str):
     spark = get_spark_session("cards-pipeline")
     reader = DataReader(spark)
 
-    db_props = get_postgres_properties()
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
+    db_properties = get_postgres_properties()
+    jdbc_url = db_properties["url"]
 
     # ---------------------------
     # INGESTION
@@ -35,9 +35,9 @@ def run_cards_pipeline(day: str):
             .format("jdbc") \
             .option("url", jdbc_url) \
             .option("dbtable", "stg_cards") \
-            .option("user", db_props["user"]) \
-            .option("password", db_props["password"]) \
-            .option("driver", db_props["driver"]) \
+            .option("user", db_properties["user"]) \
+            .option("password", db_properties["password"]) \
+            .option("driver", db_properties["driver"]) \
             .load()
 
         valid_df = valid_df.join(
@@ -63,9 +63,9 @@ def run_cards_pipeline(day: str):
         .format("jdbc") \
         .option("url", jdbc_url) \
         .option("dbtable", "stg_cards") \
-        .option("user", db_props["user"]) \
-        .option("password", db_props["password"]) \
-        .option("driver", db_props["driver"]) \
+        .option("user", db_properties["user"]) \
+        .option("password", db_properties["password"]) \
+        .option("driver", db_properties["driver"]) \
         .mode("append") \
         .save()
 
@@ -79,9 +79,9 @@ def run_cards_pipeline(day: str):
             .format("jdbc") \
             .option("url", jdbc_url) \
             .option("dbtable", "card_pipeline_errors") \
-            .option("user", db_props["user"]) \
-            .option("password", db_props["password"]) \
-            .option("driver", db_props["driver"]) \
+            .option("user", db_properties["user"]) \
+            .option("password", db_properties["password"]) \
+            .option("driver", db_properties["driver"]) \
             .option("stringtype", "unspecified") \
             .mode("append") \
             .save()

@@ -1,10 +1,8 @@
-# src/pipelines/groups/groups_pipeline.py
-
 import argparse
+
+from src.db.connection import get_postgres_properties
 from src.spark.spark_session import get_spark_session
 from src.utils.reader import DataReader
-from src.db.connection import get_postgres_properties
-
 from src.pipelines.groups.groups_ingestion import (
     read_groups_raw,
     read_agents_from_db
@@ -23,10 +21,10 @@ def run_groups_pipeline(day: str):
     # -----------------------------------
     raw_df = read_groups_raw(reader, day)
 
-    db_props = get_postgres_properties()
-    jdbc_url = "jdbc:postgresql://localhost:5432/rithvik_zluri_pipeline_db"
+    db_properties = get_postgres_properties()
+    jdbc_url = db_properties["url"]
 
-    agents_df = read_agents_from_db(spark, jdbc_url, db_props)
+    agents_df = read_agents_from_db(spark, jdbc_url, db_properties)
 
 
     # -----------------------------------
@@ -44,9 +42,9 @@ def run_groups_pipeline(day: str):
         .format("jdbc") \
         .option("url", jdbc_url) \
         .option("dbtable", "stg_groups") \
-        .option("user", db_props["user"]) \
-        .option("password", db_props["password"]) \
-        .option("driver", db_props["driver"]) \
+        .option("user", db_properties["user"]) \
+        .option("password", db_properties["password"]) \
+        .option("driver", db_properties["driver"]) \
         .mode("overwrite") \
         .save()
 
@@ -59,9 +57,9 @@ def run_groups_pipeline(day: str):
         .format("jdbc") \
         .option("url", jdbc_url) \
         .option("dbtable", "stg_group_membership") \
-        .option("user", db_props["user"]) \
-        .option("password", db_props["password"]) \
-        .option("driver", db_props["driver"]) \
+        .option("user", db_properties["user"]) \
+        .option("password", db_properties["password"]) \
+        .option("driver", db_properties["driver"]) \
         .mode("overwrite") \
         .save()
 
@@ -77,9 +75,9 @@ def run_groups_pipeline(day: str):
             .format("jdbc") \
             .option("url", jdbc_url) \
             .option("dbtable", "group_pipeline_errors") \
-            .option("user", db_props["user"]) \
-            .option("password", db_props["password"]) \
-            .option("driver", db_props["driver"]) \
+            .option("user", db_properties["user"]) \
+            .option("password", db_properties["password"]) \
+            .option("driver", db_properties["driver"]) \
             .option("stringtype", "unspecified") \
             .mode("append") \
             .save()
