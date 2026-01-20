@@ -268,3 +268,107 @@ def test_optional_field_type_mismatch_does_not_fail(spark):
 
     assert final_df.count() == 1
     assert error_df.count() == 0
+
+# ======================================================
+# SAFE_COL: flat column exists → return F.col(col_name)
+# ======================================================
+def test_safe_col_flat_column_present(spark):
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=40,
+                contact=make_agent().contact,
+                signature="my-signature"
+            )
+        ],
+        schema=StructType([
+            StructField("id", LongType(), True),
+            StructField("contact", contact_schema, True),
+            StructField("signature", StringType(), True),
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, [40]))
+
+    assert final_df.count() == 1
+    assert final_df.collect()[0]["signature"] == "my-signature"
+    assert error_df.count() == 0
+
+
+# ======================================================
+# SAFE_COL: flat column missing → return F.lit(None)
+# ======================================================
+def test_safe_col_flat_column_missing(spark):
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=41,
+                contact=make_agent().contact
+            )
+        ],
+        schema=StructType([
+            StructField("id", LongType(), True),
+            StructField("contact", contact_schema, True),
+            # signature column missing
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, [41]))
+
+    assert final_df.count() == 1
+    assert "signature" in final_df.columns
+    assert final_df.collect()[0]["signature"] is None
+    assert error_df.count() == 0
+
+
+# ======================================================
+# SAFE_NESTED_COL: struct missing → return F.lit(None)
+# ======================================================
+def test_safe_nested_col_struct_missing(spark):
+    df = spark.createDataFrame(
+        [
+            Row(id=42)
+        ],
+        schema=StructType([
+            StructField("id", LongType(), True),
+            # contact struct missing
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, [42]))
+
+    # required fields missing → error expected
+    assert final_df.count() == 0
+    assert error_df.count() == 1
+    error_row = error_df.collect()[0]
+    assert error_row["error_type"] == "MISSING_REQUIRED_FIELD"
+
+
+# ======================================================
+# SAFE_NESTED_COL: nested field missing → return F.lit(None)
+# ======================================================
+def test_safe_nested_col_nested_field_missing(spark):
+    partial_contact_schema = StructType([
+        StructField("email", StringType(), True),
+        # name field missing
+    ])
+
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=43,
+                contact=Row(email="partial@test.com")
+            )
+        ],
+        schema=StructType([
+            StructField("id", LongType(), True),
+            StructField("contact", partial_contact_schema, True),
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, [43]))
+
+    # name is required → error expected
+    assert final_df.count() == 0
+    assert error_df.count() == 1
+    assert error_df.collect()[0]["error_type"] == "MISSING_REQUIRED_FIELD"
