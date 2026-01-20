@@ -20,67 +20,54 @@ from src.spark.spark_session import get_spark_session
 
 @flow(name="zluri-day-pipeline")
 def zluri_day_pipeline(day: str):
-
     # ------------------
-    # Core dimensions
+    # Core dimensions (MANDATORY)
     # ------------------
     agents = agents_pipeline.submit(day)
-    roles = roles_pipeline.submit(day)
-
     agents_upsert = upsert_agents.submit(day, wait_for=[agents])
-    roles_upsert = upsert_roles.submit(day, wait_for=[roles])
 
-    # ------------------
-    # Agent ↔ Role mapping
-    # ------------------
-    agent_roles = agent_roles_pipeline.submit(
-        day,
-        wait_for=[agents_upsert, roles_upsert],
-    )
-    agent_roles_upsert = upsert_agent_roles.submit(
-        day,
-        wait_for=[agent_roles],
-    )
-
-    # ------------------
-    # Groups
-    # ------------------
     groups = groups_pipeline.submit(day, wait_for=[agents_upsert])
     groups_upsert = upsert_groups.submit(day, wait_for=[groups])
 
     # ------------------
-    # Financial entities
+    # Optional pipelines
     # ------------------
+    roles = roles_pipeline.submit(day)
+    roles_upsert = upsert_roles.submit(day, run_pipeline=roles.result(), wait_for=[roles])
+
+    agent_roles = agent_roles_pipeline.submit(
+        day, wait_for=[agents_upsert, roles_upsert]
+    )
+    agent_roles_upsert = upsert_agent_roles.submit(
+        day, run_pipeline=agent_roles.result(), wait_for=[agent_roles]
+    )
+
     budgets = budgets_pipeline.submit(day)
-    cards = cards_pipeline.submit(day)
+    budgets_upsert = upsert_budgets.submit(day, run_pipeline=budgets.result(), wait_for=[budgets])
 
-    budgets_upsert = upsert_budgets.submit(day, wait_for=[budgets])
-    cards_upsert = upsert_cards.submit(day, wait_for=[cards])
+    cards = cards_pipeline.submit(day)
+    cards_upsert = upsert_cards.submit(day, run_pipeline=cards.result(), wait_for=[cards])
 
     # ------------------
-    # Transactions
+    # Transactions (MANDATORY)
     # ------------------
     transactions = transactions_pipeline.submit(
-        day,
-        wait_for=[budgets_upsert, cards_upsert],
+        day, wait_for=[budgets_upsert, cards_upsert]
     )
-    transactions_upsert = upsert_transactions.submit(
-        day,
-        wait_for=[transactions],
-    )
+    transactions_upsert = upsert_transactions.submit(day, wait_for=[transactions])
 
     # ------------------
     # 🔥 HARD WAIT FOR EVERYTHING
     # ------------------
     all_futures = [
         agents,
-        roles,
         agents_upsert,
+        groups,
+        groups_upsert,
+        roles,
         roles_upsert,
         agent_roles,
         agent_roles_upsert,
-        groups,
-        groups_upsert,
         budgets,
         budgets_upsert,
         cards,
@@ -90,7 +77,11 @@ def zluri_day_pipeline(day: str):
     ]
 
     for f in all_futures:
-        f.result()
+        try:
+            f.result()
+        except Exception as e:
+            # Optional pipelines may fail; log warning
+            print(f"[WARNING] Task {f} failed or skipped: {e}")
 
     # ------------------
     # STOP SPARK (SAFE)
@@ -98,7 +89,6 @@ def zluri_day_pipeline(day: str):
     spark = get_spark_session()
     spark.stop()
     print("Spark session stopped cleanly ✅")
-
 
 
 # =========================
