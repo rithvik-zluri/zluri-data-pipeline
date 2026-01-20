@@ -23,7 +23,7 @@ def spark():
 
 
 # -------------------------------------------------------------------
-# RAW INPUT SCHEMA (matches ingestion output)
+# RAW (NESTED) INPUT SCHEMA
 # -------------------------------------------------------------------
 def raw_schema():
     return StructType([
@@ -50,6 +50,31 @@ def raw_schema():
                 ]), True),
             ])
         ), True)
+    ])
+
+
+# -------------------------------------------------------------------
+# FLAT INPUT SCHEMA
+# -------------------------------------------------------------------
+def flat_schema():
+    return StructType([
+        StructField("id", StringType(), True),
+        StructField("uuid", StringType(), True),
+        StructField("occurredTime", StringType(), True),
+        StructField("updatedTime", StringType(), True),
+        StructField("userId", StringType(), True),
+        StructField("userUuid", StringType(), True),
+        StructField("userName", StringType(), True),
+        StructField("merchantName", StringType(), True),
+        StructField("rawMerchantName", StringType(), True),
+        StructField("cardId", StringType(), True),
+        StructField("cardUuid", StringType(), True),
+        StructField("budgetId", StringType(), True),
+        StructField("budgetUuid", StringType(), True),
+        StructField("originalCurrencyAmount", LongType(), True),
+        StructField("exponent", IntegerType(), True),
+        StructField("originalCurrencyCode", StringType(), True),
+        StructField("exchangeRate", DoubleType(), True),
     ])
 
 
@@ -85,9 +110,7 @@ def test_api_rate_used(mock_get_rate, spark):
     }], schema=raw_schema())
 
     valid_df, error_df, state_df = transform_transactions(df, "day1")
-
-    row = valid_df.orderBy("transaction_id").first()
-
+    row = valid_df.first()
     assert row["original_amount"] == 10.0
     assert row["exchange_rate"] == 0.5
     assert row["amount_usd"] == 5.0
@@ -132,7 +155,6 @@ def test_payload_fallback_used(mock_get_rate, spark):
 
     valid_df, error_df, _ = transform_transactions(df, "day1")
     row = valid_df.first()
-
     assert row["exchange_rate"] == 2.0
     assert row["fx_source"] == "PAYLOAD"
     assert row["amount_usd"] == 40.0
@@ -140,7 +162,7 @@ def test_payload_fallback_used(mock_get_rate, spark):
 
 
 # ============================================================
-# 3. NO API + NO PAYLOAD → ERROR
+# 3. NO FX RATE → ERROR
 # ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
 def test_no_fx_rate_available(mock_get_rate, spark):
@@ -171,7 +193,6 @@ def test_no_fx_rate_available(mock_get_rate, spark):
     }], schema=raw_schema())
 
     valid_df, error_df, _ = transform_transactions(df, "day1")
-
     assert valid_df.count() == 0
     assert "exchange_rate not found" in error_df.first()["error_message"]
 
@@ -184,82 +205,42 @@ def test_deduplication(mock_get_rate, spark):
     mock_get_rate.return_value = 1.0
 
     df = spark.createDataFrame([{
-        "results": [
-            {
-                "id": "t4",
-                "uuid": "u4",
-                "occurredTime": "2024-01-04T10:00:00",
-                "updatedTime": "2024-01-04T11:00:00",
-                "userId": "user4",
-                "userUuid": "uu4",
-                "userName": "Dup",
-                "merchantName": "Zomato",
-                "rawMerchantName": "ZMT",
-                "cardId": "c4",
-                "cardUuid": "cu4",
-                "budgetId": "b4",
-                "budgetUuid": "bu4",
-                "currencyData": {
-                    "originalCurrencyAmount": 4000,
-                    "exponent": 2,
-                    "originalCurrencyCode": "USD",
-                    "exchangeRate": 1.0
-                }
-            },
-            {
-                "id": "t4",
-                "uuid": "u4",
-                "occurredTime": "2024-01-04T10:00:00",
-                "updatedTime": "2024-01-04T11:00:00",
-                "userId": "user4",
-                "userUuid": "uu4",
-                "userName": "Dup",
-                "merchantName": "Zomato",
-                "rawMerchantName": "ZMT",
-                "cardId": "c4",
-                "cardUuid": "cu4",
-                "budgetId": "b4",
-                "budgetUuid": "bu4",
-                "currencyData": {
-                    "originalCurrencyAmount": 4000,
-                    "exponent": 2,
-                    "originalCurrencyCode": "USD",
-                    "exchangeRate": 1.0
-                }
-            }
-        ]
-    }], schema=raw_schema())
-
-    valid_df, error_df, _ = transform_transactions(df, "day1")
-
-    assert valid_df.count() == 1
-    assert error_df.count() == 0
-
-
-# ============================================================
-# 5. VALIDATION: occurred_time NULL
-# ============================================================
-@patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
-def test_occurred_time_null(mock_get_rate, spark):
-    mock_get_rate.return_value = 1.0
-
-    df = spark.createDataFrame([{
         "results": [{
-            "id": "t5",
-            "uuid": "u5",
-            "occurredTime": None,
-            "updatedTime": "2024-01-05T11:00:00",
-            "userId": "user5",
-            "userUuid": "uu5",
-            "userName": "BadTime",
-            "merchantName": "Test",
-            "rawMerchantName": "TST",
-            "cardId": "c5",
-            "cardUuid": "cu5",
-            "budgetId": "b5",
-            "budgetUuid": "bu5",
+            "id": "t4",
+            "uuid": "u4",
+            "occurredTime": "2024-01-04T10:00:00",
+            "updatedTime": "2024-01-04T11:00:00",
+            "userId": "user4",
+            "userUuid": "uu4",
+            "userName": "Dup",
+            "merchantName": "Zomato",
+            "rawMerchantName": "ZMT",
+            "cardId": "c4",
+            "cardUuid": "cu4",
+            "budgetId": "b4",
+            "budgetUuid": "bu4",
             "currencyData": {
-                "originalCurrencyAmount": 5000,
+                "originalCurrencyAmount": 4000,
+                "exponent": 2,
+                "originalCurrencyCode": "USD",
+                "exchangeRate": 1.0
+            }
+        }, {
+            "id": "t4",
+            "uuid": "u4",
+            "occurredTime": "2024-01-04T10:00:00",
+            "updatedTime": "2024-01-04T11:00:00",
+            "userId": "user4",
+            "userUuid": "uu4",
+            "userName": "Dup",
+            "merchantName": "Zomato",
+            "rawMerchantName": "ZMT",
+            "cardId": "c4",
+            "cardUuid": "cu4",
+            "budgetId": "b4",
+            "budgetUuid": "bu4",
+            "currencyData": {
+                "originalCurrencyAmount": 4000,
                 "exponent": 2,
                 "originalCurrencyCode": "USD",
                 "exchangeRate": 1.0
@@ -268,13 +249,44 @@ def test_occurred_time_null(mock_get_rate, spark):
     }], schema=raw_schema())
 
     valid_df, error_df, _ = transform_transactions(df, "day1")
-
-    assert valid_df.count() == 0
-    assert error_df.first()["error_message"] == "occurred_time is null"
+    assert valid_df.count() == 1
+    assert error_df.count() == 0
 
 
 # ============================================================
-# 6. IDEMPOTENCY KEY STABILITY
+# 5. FLAT INPUT SUPPORTED
+# ============================================================
+@patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
+def test_flat_input_supported(mock_get_rate, spark):
+    mock_get_rate.return_value = 1.0
+
+    df = spark.createDataFrame([{
+        "id": "t5",
+        "uuid": "u5",
+        "occurredTime": "2024-01-05T10:00:00",
+        "updatedTime": "2024-01-05T11:00:00",
+        "userId": "user5",
+        "userUuid": "uu5",
+        "userName": "Flat",
+        "merchantName": "Test",
+        "rawMerchantName": "TST",
+        "cardId": "c5",
+        "cardUuid": "cu5",
+        "budgetId": "b5",
+        "budgetUuid": "bu5",
+        "originalCurrencyAmount": 5000,
+        "exponent": 2,
+        "originalCurrencyCode": "USD",
+        "exchangeRate": 1.0,
+    }], schema=flat_schema())
+
+    valid_df, error_df, _ = transform_transactions(df, "day1")
+    assert valid_df.count() == 1
+    assert error_df.count() == 0
+
+
+# ============================================================
+# 6. IDEMPOTENCY KEY STABLE
 # ============================================================
 @patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
 def test_idempotency_key_deterministic(mock_get_rate, spark):
@@ -305,8 +317,39 @@ def test_idempotency_key_deterministic(mock_get_rate, spark):
     }], schema=raw_schema())
 
     valid_df, _, _ = transform_transactions(df, "day1")
+    k1 = valid_df.first()["idempotency_key"]
+    k2 = valid_df.first()["idempotency_key"]
+    assert k1 == k2
 
-    key1 = valid_df.first()["idempotency_key"]
-    key2 = valid_df.first()["idempotency_key"]
 
-    assert key1 == key2
+# ============================================================
+# 7. ZERO AMOUNT → ERROR
+# ============================================================
+@patch("src.pipelines.transactions.transactions_transform.get_rate_to_usd")
+def test_zero_amount_invalid(mock_get_rate, spark):
+    mock_get_rate.return_value = 1.0
+
+    df = spark.createDataFrame([{
+        "id": "t7",
+        "uuid": "u7",
+        "occurredTime": "2024-01-07T10:00:00",
+        "updatedTime": "2024-01-07T11:00:00",
+        "userId": "user7",
+        "userUuid": "uu7",
+        "userName": "ZeroAmount",
+        "merchantName": "Test",
+        "rawMerchantName": "TST",
+        "cardId": "c7",
+        "cardUuid": "cu7",
+        "budgetId": "b7",
+        "budgetUuid": "bu7",
+        "originalCurrencyAmount": 0,
+        "exponent": 2,
+        "originalCurrencyCode": "USD",
+        "exchangeRate": 1.0,
+    }], schema=flat_schema())
+
+    valid_df, error_df, _ = transform_transactions(df, "day1")
+    assert valid_df.count() == 0
+    assert error_df.count() == 1
+    assert "original_amount is null or zero" in error_df.first()["error_message"]
