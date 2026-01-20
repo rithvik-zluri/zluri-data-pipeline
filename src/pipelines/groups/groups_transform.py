@@ -1,65 +1,85 @@
 # src/pipelines/groups/groups_transform.py
 
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, explode, to_timestamp, lit, to_json, struct
+from pyspark.sql import functions as F
+from pyspark.sql.types import ArrayType
 
 
 def transform_groups(raw_df: DataFrame, agents_df: DataFrame):
     """
     Core transformation logic for groups pipeline.
+
     Returns:
-        groups_df,
-        valid_membership_df,
-        error_df
+        groups_df               -> clean group dimension
+        valid_membership_df     -> valid group-agent links
+        error_df                -> invalid or malformed records
     """
 
-    # -----------------------------------
-    # GROUPS TABLE (stg_groups)
-    # -----------------------------------
+    # =====================================================
+    # 1. NORMALIZE GROUPS (schema-safe)
+    # =====================================================
     groups_df = raw_df.select(
-        col("id").cast("bigint").alias("group_id"),
-        col("name"),
-        col("parent_group_id").cast("bigint"),
-        to_timestamp(col("created_at")).alias("created_at"),
-        to_timestamp(col("updated_at")).alias("updated_at")
+        F.col("id").cast("bigint").alias("group_id"),
+        F.col("name"),
+        F.col("parent_group_id").cast("bigint"),
+        F.to_timestamp(F.col("created_at")).alias("created_at"),
+        F.to_timestamp(F.col("updated_at")).alias("updated_at"),
+    ).filter(
+        F.col("group_id").isNotNull()
     )
 
-    # -----------------------------------
-    # SAFE EXPLODE agent_ids
-    # -----------------------------------
+    # =====================================================
+    # 2. SAFELY HANDLE agent_ids (schema drift tolerant)
+    # =====================================================
+
+    # Check if agent_ids exists and is an array
+    agent_ids_col = (
+        F.col("agent_ids")
+        if "agent_ids" in raw_df.columns
+        and isinstance(raw_df.schema["agent_ids"].dataType, ArrayType)
+        else F.array()
+    )
+
     exploded_df = raw_df.select(
-        col("id").cast("bigint").alias("group_id"),
-        explode(col("agent_ids")).alias("agent_id")
+        F.col("id").cast("bigint").alias("group_id"),
+        F.explode_outer(agent_ids_col).alias("agent_id")
     )
 
     membership_df = exploded_df.select(
-        col("group_id"),
-        col("agent_id").cast("bigint").alias("agent_id")
+        F.col("group_id"),
+        F.col("agent_id").cast("bigint").alias("agent_id")
     )
 
-    # -----------------------------------
-    # SPLIT VALID / INVALID MEMBERSHIP
-    # -----------------------------------
+    # =====================================================
+    # 3. SPLIT VALID / INVALID MEMBERSHIPS
+    # =====================================================
     valid_membership_df = membership_df.join(
-        agents_df,
+        agents_df.select(F.col("agent_id")),
         on="agent_id",
         how="inner"
     )
 
-    invalid_membership_df = membership_df.join(
-        agents_df,
+    invalid_membership_df = membership_df.filter(
+        F.col("agent_id").isNotNull()
+    ).join(
+        agents_df.select(F.col("agent_id")),
         on="agent_id",
         how="left_anti"
     )
 
-    # -----------------------------------
-    # ERROR RECORDS
-    # -----------------------------------
+    # =====================================================
+    # 4. ERROR RECORDS (schema-safe JSON)
+    # =====================================================
     error_df = invalid_membership_df.select(
-        col("group_id"),
-        lit("INVALID_AGENT_ID").alias("error_type"),
-        lit("agent_id does not exist in agents table").alias("error_message"),
-        to_json(struct(col("group_id"), col("agent_id"))).alias("raw_record")
+        F.col("group_id"),
+        F.lit("INVALID_AGENT_ID").alias("error_type"),
+        F.lit("agent_id does not exist in agents table").alias("error_message"),
+        F.to_json(
+            F.struct(
+                F.col("group_id").alias("group_id"),
+                F.col("agent_id").alias("agent_id")
+            )
+        ).alias("raw_record")
     )
 
     return groups_df, valid_membership_df, error_df
