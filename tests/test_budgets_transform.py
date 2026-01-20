@@ -1,5 +1,7 @@
 import pytest
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import struct
+
 from pyspark.sql.types import (
     StructType, StructField, StringType, BooleanType, ArrayType, DoubleType, StructType
 )
@@ -384,3 +386,59 @@ def test_transform_budgets_schema(spark, budgets_schema):
     assert expected_columns.issubset(set(valid_df.columns))
     assert "error_type" in error_df.columns
     assert "raw_record" in error_df.columns
+
+# --------------------------------------------------
+# 11. NON-NESTED INPUT (NO RESULTS ARRAY)
+# --------------------------------------------------
+def test_transform_budgets_non_nested_input(spark):
+    schema = StructType([
+        StructField("id", StringType(), True),
+        StructField("uuid", StringType(), True),
+        StructField("name", StringType(), True),
+        StructField("description", StringType(), True),
+        StructField("retired", BooleanType(), True),
+        StructField("startDate", StringType(), True),
+        StructField("recurringInterval", StringType(), True),
+        StructField("timezone", StringType(), True),
+        StructField("currentPeriod", StructType([
+            StructField("limit", DoubleType(), True),
+            StructField("overspendBuffer", DoubleType(), True),
+            StructField("assigned", DoubleType(), True),
+            StructField("spent", StructType([
+                StructField("cleared", DoubleType(), True),
+                StructField("pending", DoubleType(), True),
+                StructField("total", DoubleType(), True),
+            ]), True),
+        ]), True),
+    ])
+
+    raw_data = [{
+        "id": "b1",
+        "uuid": "u1",
+        "name": "AWS",
+        "description": "Cloud",
+        "retired": False,
+        "startDate": "2024-01-01",
+        "recurringInterval": "monthly",
+        "timezone": "UTC",
+        "currentPeriod": {
+            "limit": 1000.0,
+            "overspendBuffer": 100.0,
+            "assigned": 900.0,
+            "spent": {
+                "cleared": 200.0,
+                "pending": 50.0,
+                "total": 250.0
+            }
+        }
+    }]
+
+    raw_df = spark.createDataFrame(raw_data, schema)
+
+    # IMPORTANT: wrap row into "budget" struct
+    raw_df = raw_df.select(struct(*raw_df.columns).alias("budget"))
+
+    valid_df, error_df = transform_budgets(raw_df, day="2024-01-10")
+
+    assert valid_df.count() == 1
+    assert error_df.count() == 0

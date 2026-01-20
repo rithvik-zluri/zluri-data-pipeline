@@ -1,10 +1,27 @@
-from pyspark.sql.functions import col, explode, to_date, lit, current_timestamp, struct, to_json
+from pyspark.sql.functions import (
+    col,
+    explode,
+    to_date,
+    lit,
+    current_timestamp,
+    struct,
+    to_json
+)
 
 
 def transform_budgets(raw_df, day: str):
-    exploded_df = raw_df.select(explode(col("results")).alias("budget"))
+    # ---------------------------------
+    # HANDLE NESTED VS NON-NESTED INPUT
+    # ---------------------------------
+    if "results" in raw_df.columns:
+        base_df = raw_df.select(explode(col("results")).alias("budget"))
+    else:
+        base_df = raw_df.withColumnRenamed("budget", "budget")
 
-    budgets_df = exploded_df.select(
+    # ---------------------------------
+    # SELECT FIELDS (NULL-SAFE)
+    # ---------------------------------
+    budgets_df = base_df.select(
         col("budget.id").alias("budget_id"),
         col("budget.uuid").alias("budget_uuid"),
         col("budget.name").alias("name"),
@@ -24,27 +41,36 @@ def transform_budgets(raw_df, day: str):
         current_timestamp().alias("ingested_at")
     )
 
-    # ---------------------------
-    # VALIDATION
-    # ---------------------------
-    error_df = budgets_df.filter(
+    # ---------------------------------
+    # VALIDATION FLAG
+    # ---------------------------------
+    budgets_df = budgets_df.withColumn(
+        "is_invalid",
         col("budget_id").isNull() | col("limit_amount").isNull()
-    ).select(
+    )
+
+    # ---------------------------------
+    # ERROR RECORDS
+    # ---------------------------------
+    error_df = budgets_df.filter(col("is_invalid")).select(
         col("budget_id"),
         lit("VALIDATION_ERROR").alias("error_type"),
         lit("budget_id or limit_amount is null").alias("error_message"),
-        to_json(struct(*budgets_df.columns)).alias("raw_record"),
+        to_json(
+            struct(*[c for c in budgets_df.columns if c != "is_invalid"])
+        ).alias("raw_record"),
         col("sync_day"),
         current_timestamp().alias("created_at")
     )
 
-    valid_df = budgets_df.filter(
-        col("budget_id").isNotNull() & col("limit_amount").isNotNull()
+    # ---------------------------------
+    # VALID RECORDS
+    # ---------------------------------
+    valid_df = (
+        budgets_df
+        .filter(~col("is_invalid"))
+        .drop("is_invalid")
+        .dropDuplicates(["budget_id"])
     )
-
-    # ---------------------------
-    # DEDUPLICATION (within batch)
-    # ---------------------------
-    valid_df = valid_df.dropDuplicates(["budget_id"])
 
     return valid_df, error_df
