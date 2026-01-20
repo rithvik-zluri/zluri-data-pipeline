@@ -199,3 +199,72 @@ def test_empty_input(spark):
 
     assert final_df.count() == 0
     assert error_df.count() == 0
+
+
+# ======================================================
+# WRONG TYPE CASTING
+# ======================================================
+
+def test_error_when_id_is_non_numeric(spark):
+    df = spark.createDataFrame(
+        [Row(id="abc", contact=make_agent().contact)],
+        schema=StructType([
+            StructField("id", StringType(), True),
+            StructField("contact", contact_schema, True),
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, []))
+
+    assert final_df.count() == 0
+    assert error_df.count() == 1
+
+
+# ======================================================
+# WHEN OPTIONAL FIELDS ARE IGNORED
+# ======================================================
+
+def test_extra_fields_are_ignored(spark):
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=20,
+                contact=make_agent().contact,
+                random_field="junk"
+            )
+        ],
+        schema=StructType([
+            StructField("id", LongType(), True),
+            StructField("contact", contact_schema, True),
+            StructField("random_field", StringType(), True),
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, [20]))
+
+    assert final_df.count() == 1
+    assert error_df.count() == 0
+
+# ======================================================
+# PARTIAL OPTIONAL FIELD TYPE MISMATCH
+# ======================================================
+def test_optional_field_type_mismatch_does_not_fail(spark):
+    df = spark.createDataFrame(
+        [
+            Row(
+                id=30,
+                contact=make_agent().contact,
+                available="yes"
+            )
+        ],
+        schema=StructType([
+            StructField("id", LongType(), True),
+            StructField("contact", contact_schema, True),
+            StructField("available", StringType(), True),
+        ])
+    )
+
+    final_df, error_df = transform_agents(df, agents_df(spark, [30]))
+
+    assert final_df.count() == 1
+    assert error_df.count() == 0

@@ -1,5 +1,5 @@
 -- ============================================================
--- 013_upsert_groups.sql
+-- 013_upsert_groups.sql (CYCLE SAFE)
 -- ============================================================
 
 BEGIN;
@@ -69,26 +69,29 @@ inserted_membership AS (
 ),
 
 -- ----------------------------
--- RECURSIVE GROUP TREE
+-- RECURSIVE GROUP TREE (CYCLE SAFE)
 -- ----------------------------
 group_tree AS (
     -- base case
     SELECT
         g.group_id,
         g.parent_group_id,
-        g.group_id AS root_group_id
+        g.group_id        AS root_group_id,
+        ARRAY[g.group_id] AS path
     FROM groups g
 
     UNION ALL
 
-    -- recursive step
+    -- recursive step (prevent cycles)
     SELECT
         parent.group_id,
         parent.parent_group_id,
-        child.root_group_id
+        child.root_group_id,
+        child.path || parent.group_id
     FROM groups parent
     JOIN group_tree child
       ON parent.group_id = child.parent_group_id
+    WHERE NOT parent.group_id = ANY(child.path)
 ),
 
 -- ----------------------------
@@ -102,6 +105,9 @@ active_groups AS (
     WHERE a.status = 'active'
 ),
 
+-- ----------------------------
+-- GROUPS WITH ACTIVE DESCENDANTS
+-- ----------------------------
 groups_with_active_descendants AS (
     SELECT DISTINCT gt.root_group_id AS group_id
     FROM group_tree gt

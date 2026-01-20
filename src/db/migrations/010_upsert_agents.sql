@@ -3,9 +3,10 @@
 -- ============================================================
 -- Purpose:
 --   1. Upsert agents from stg_agents into agents
---   2. Capture insert/update metrics
---   3. Snapshot agent active status per day
---   4. Persist pipeline metrics with Prefect context
+--   2. Prevent older data from overwriting newer data
+--   3. Capture insert/update metrics
+--   4. Snapshot agent active status per day
+--   5. Persist pipeline metrics with Prefect context
 -- ============================================================
 
 BEGIN;
@@ -21,7 +22,7 @@ WITH context AS (
 ),
 
 -- ----------------------------
--- UPSERT AGENTS
+-- UPSERT AGENTS (DEFENSIVE)
 -- ----------------------------
 upserted AS (
     INSERT INTO agents (
@@ -93,7 +94,16 @@ upserted AS (
         ticket_scope             = EXCLUDED.ticket_scope,
         signature                = EXCLUDED.signature,
         freshchat_agent          = EXCLUDED.freshchat_agent,
-        updated_at               = EXCLUDED.updated_at
+
+        -- 🔒 Prevent time-travel overwrites
+        updated_at = GREATEST(
+            agents.updated_at,
+            EXCLUDED.updated_at
+        )
+
+    -- 🔒 Only allow overwrite if incoming record is newer or equal
+    WHERE EXCLUDED.updated_at >= agents.updated_at
+
     RETURNING (xmax = 0) AS inserted
 ),
 
@@ -155,7 +165,7 @@ CROSS JOIN context c
 CROSS JOIN finished f;
 
 -- ----------------------------
--- AGENT STATUS HISTORY
+-- AGENT STATUS HISTORY (DEFENSIVE)
 -- ----------------------------
 INSERT INTO agent_status_history (
     agent_id,
@@ -164,7 +174,7 @@ INSERT INTO agent_status_history (
 )
 SELECT
     agent_id,
-    updated_at::date,
+    COALESCE(updated_at, NOW())::date,
     (status = 'active')
 FROM agents
 ON CONFLICT (agent_id, sync_date)
