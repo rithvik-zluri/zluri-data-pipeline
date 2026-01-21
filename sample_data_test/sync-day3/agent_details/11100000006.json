@@ -1,0 +1,42 @@
+{
+    "id": 11100000006,
+    "org_agent_id": "org_11100000006",
+    "group_ids": [],
+    "org_group_ids": [],
+    "deactivated": false,
+    "agent_operational_status": "offline",
+    "available": false,
+    "available_since": null,
+    "occasional": true,
+    "ticket_scope": 2,
+    "role_ids": [
+        69000378066
+    ],
+    "skill_ids": [
+        1002
+    ],
+    "type": "support_agent",
+    "last_active_at": "2026-01-01T18:00:00Z",
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z",
+    "signature": null,
+    "freshchat_agent": false,
+    "contact": {
+        "active": true,
+        "email": "emma.davis@example.com",
+        "name": "Emma Davis",
+        "job_title": "Part-time Support",
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-02T00:00:00Z",
+        "avatar": null
+    },
+    "scope": 2,
+    "availability": [
+        {
+            "channel": "ticket",
+            "available": false,
+            "available_since": null
+        }
+    ],
+    "focus_mode": false
+}

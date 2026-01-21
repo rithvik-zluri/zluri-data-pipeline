@@ -14,12 +14,13 @@ def run_agent_roles_pipeline(day: str):
     # -----------------------
     # Ingestion
     # -----------------------
-    agents_df, roles_df = read_agent_roles_inputs(spark, day)
+    agent_details_df, roles_df = read_agent_roles_inputs(spark, day)
+
 
     # -----------------------
     # Transformation
     # -----------------------
-    agent_roles_df = transform_agent_roles(agents_df, roles_df)
+    valid_agent_roles_df, error_df = transform_agent_roles(agent_details_df, roles_df)
 
 
     # -----------------------
@@ -28,12 +29,27 @@ def run_agent_roles_pipeline(day: str):
     db_properties = get_postgres_properties()
     jdbc_url = db_properties["url"]
 
-    agent_roles_df.write \
+    # Write Valid Data
+    valid_agent_roles_df.write \
         .mode("overwrite") \
         .jdbc(jdbc_url, "stg_agent_roles", properties=db_properties)
 
     print("Data written to stg_agent_roles")
+
+    # -----------------------
+    # Write Errors
+    # -----------------------
+    error_count = error_df.count()
+    if error_count > 0:
+        print(f"Found {error_count} error records. Writing to agent_roles_pipeline_errors...")
+        error_df.write \
+            .mode("append") \
+            .jdbc(jdbc_url, "agent_roles_pipeline_errors", properties=db_properties)
+    else:
+        print("No errors found.")
+
     print(f"Agent-Roles pipeline completed successfully for {day}")
+    print(f"Error records written: {error_count}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

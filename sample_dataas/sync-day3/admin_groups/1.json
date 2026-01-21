@@ -1,0 +1,39 @@
+[
+  {
+    "id": 2001,
+    "name": "Engineering",
+    "parent_group_id": null,
+    "description": "Root Group",
+    "type": "support_agent_group",
+    "agent_ids": [
+      1003,
+      1006,
+      1009
+    ]
+  },
+  {
+    "id": 2002,
+    "name": "DevOps",
+    "parent_group_id": 2001,
+    "description": "Middle Group",
+    "type": "support_agent_group",
+    "agent_ids": [
+      1001,
+      1004,
+      1007,
+      1010
+    ]
+  },
+  {
+    "id": 2003,
+    "name": "SRE Team",
+    "parent_group_id": 2002,
+    "description": "Leaf Group",
+    "type": "support_agent_group",
+    "agent_ids": [
+      1002,
+      1005,
+      1008
+    ]
+  }
+]

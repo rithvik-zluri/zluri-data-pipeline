@@ -1,0 +1,131 @@
+[
+  {
+    "id": 22200000001,
+    "name": "Cycle Group A",
+    "description": "Parent points to B (cycle)",
+    "agent_ids": [
+      11100000001,
+      11100000004,
+      11100000007,
+      11100000010
+    ],
+    "parent_group_id": 22200000002,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000002,
+    "name": "Cycle Group B",
+    "description": "Parent points to A (cycle)",
+    "agent_ids": [
+      11100000001,
+      11100000005,
+      11100000008
+    ],
+    "parent_group_id": 22200000001,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000003,
+    "name": "Agent IDs Wrong Type",
+    "description": "agent_ids is string instead of array",
+    "agent_ids": "11100000001",
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000004,
+    "name": "Unknown Agent Membership",
+    "description": "agent_ids contains an agent id not present in agents",
+    "agent_ids": [
+      99999999999
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": null,
+    "name": "Missing Group ID",
+    "description": "Should be dropped because id is null",
+    "agent_ids": [
+      11100000001
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000005,
+    "name": "North America Support",
+    "description": "Support team for North American region",
+    "agent_ids": [
+      11100000004,
+      11100000005,
+      11100000007
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000006,
+    "name": "EMEA Support",
+    "description": "Support team for Europe, Middle East, and Africa",
+    "agent_ids": [
+      11100000006
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000007,
+    "name": "APAC Support",
+    "description": "Support team for Asia-Pacific region",
+    "agent_ids": [
+      11100000009,
+      11100000010
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000008,
+    "name": "Latin America Support",
+    "description": "Support team for Latin America",
+    "agent_ids": [
+      11100000008
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000009,
+    "name": "Senior Agents",
+    "description": "Group of senior support agents",
+    "agent_ids": [
+      11100000004,
+      11100000007,
+      11100000010
+    ],
+    "parent_group_id": 22200000005,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  },
+  {
+    "id": 22200000010,
+    "name": "Part-time Agents",
+    "description": "Occasional and part-time support staff",
+    "agent_ids": [
+      11100000006
+    ],
+    "parent_group_id": null,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  }
+]

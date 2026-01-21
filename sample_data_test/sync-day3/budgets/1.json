@@ -1,0 +1,245 @@
+{
+  "results": [
+    {
+      "id": "QnVkZ2V0OlRFU1RfVkFMSUQ=",
+      "uuid": "bgt_test_valid",
+      "name": "Valid Budget",
+      "description": "Baseline valid budget",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 1000,
+        "overspendBuffer": 0,
+        "assigned": 0,
+        "spent": {
+          "cleared": 0,
+          "pending": 0,
+          "total": 0
+        }
+      }
+    },
+    {
+      "id": null,
+      "uuid": "bgt_missing_id",
+      "name": "Missing ID Budget",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 100
+      }
+    },
+    {
+      "id": "QnVkZ2V0OlRFU1RfTUlTU0lOR19MSU1JVA==",
+      "uuid": "bgt_missing_limit",
+      "name": "Missing Limit Budget",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": null
+      }
+    },
+    {
+      "id": "QnVkZ2V0OlRFU1RfV1JPTkdfVFlQRQ==",
+      "uuid": "bgt_limit_string",
+      "name": "Limit Wrong Type",
+      "retired": false,
+      "startDate": "bad-date",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": "1000"
+      }
+    },
+    {
+      "id": "QnVkZ2V0OlRFU1RfTkVHQVRJVkU=",
+      "uuid": "bgt_negative_limit",
+      "name": "Negative Limit Budget",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": -10
+      }
+    },
+    {
+      "id": "QnVkZ2V0Ok1BUktFVElORw==",
+      "uuid": "bgt_marketing",
+      "name": "Marketing Budget",
+      "description": "Monthly marketing expenses",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "America/New_York",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 50000,
+        "overspendBuffer": 5000,
+        "assigned": 30000,
+        "spent": {
+          "cleared": 12000,
+          "pending": 3500,
+          "total": 15500
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0OkVOR0lORUVSSU5H",
+      "uuid": "bgt_engineering",
+      "name": "Engineering Budget",
+      "description": "Engineering tools and services",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "America/Los_Angeles",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 100000,
+        "overspendBuffer": 10000,
+        "assigned": 75000,
+        "spent": {
+          "cleared": 45000,
+          "pending": 8000,
+          "total": 53000
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0Ok9QRVJBVElPTlM=",
+      "uuid": "bgt_operations",
+      "name": "Operations Budget",
+      "description": "General operational expenses",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "QUARTERLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 150000,
+        "overspendBuffer": 15000,
+        "assigned": 90000,
+        "spent": {
+          "cleared": 25000,
+          "pending": 5000,
+          "total": 30000
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0OlNBTEVT",
+      "uuid": "bgt_sales",
+      "name": "Sales Budget",
+      "description": "Sales team expenses and travel",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "America/Chicago",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 75000,
+        "overspendBuffer": 7500,
+        "assigned": 50000,
+        "spent": {
+          "cleared": 18000,
+          "pending": 6000,
+          "total": 24000
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0OkhS",
+      "uuid": "bgt_hr",
+      "name": "HR Budget",
+      "description": "Human resources and recruiting",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 25000,
+        "overspendBuffer": 2500,
+        "assigned": 15000,
+        "spent": {
+          "cleared": 8000,
+          "pending": 2000,
+          "total": 10000
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0OklU",
+      "uuid": "bgt_it",
+      "name": "IT Infrastructure",
+      "description": "IT infrastructure and support",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 80000,
+        "overspendBuffer": 8000,
+        "assigned": 60000,
+        "spent": {
+          "cleared": 35000,
+          "pending": 4000,
+          "total": 39000
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0OlRSQVZFTA==",
+      "uuid": "bgt_travel",
+      "name": "Travel Budget",
+      "description": "Company-wide travel expenses",
+      "retired": false,
+      "startDate": "2026-01-01",
+      "recurringInterval": "QUARTERLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2026-01-01",
+        "limit": 200000,
+        "overspendBuffer": 20000,
+        "assigned": 100000,
+        "spent": {
+          "cleared": 15000,
+          "pending": 12000,
+          "total": 27000
+        }
+      }
+    },
+    {
+      "id": "QnVkZ2V0OlJFVElSRUQ=",
+      "uuid": "bgt_retired",
+      "name": "Retired Budget",
+      "description": "This budget has been retired",
+      "retired": true,
+      "startDate": "2025-01-01",
+      "recurringInterval": "MONTHLY",
+      "timezone": "UTC",
+      "currentPeriod": {
+        "startDate": "2025-12-01",
+        "limit": 10000,
+        "overspendBuffer": 0,
+        "assigned": 0,
+        "spent": {
+          "cleared": 0,
+          "pending": 0,
+          "total": 0
+        }
+      }
+    }
+  ]
+}

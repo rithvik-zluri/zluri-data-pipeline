@@ -4,14 +4,14 @@
 -- Purpose:
 --   1. Upsert current agent-role assignments
 --   2. Mark removed roles
---   3. Persist role assignment history
+--   3. Persist role assignment history (Atomic & Corrected)
 --   4. Capture pipeline metrics with Prefect context
 -- ============================================================
 
 BEGIN;
 
 -- ----------------------------
--- Capture execution context
+-- SINGLE ATOMIC QUERY CHAIN
 -- ----------------------------
 WITH context AS (
     SELECT
@@ -20,9 +20,7 @@ WITH context AS (
         NOW()                                    AS started_at
 ),
 
--- ----------------------------
--- UPSERT CURRENT ROLE STATE
--- ----------------------------
+-- 1. Upsert & Capture Changes
 upserted AS (
     INSERT INTO agent_role_mapping (
         agent_id,
@@ -44,12 +42,10 @@ upserted AS (
         assigned_at = COALESCE(agent_role_mapping.assigned_at, NOW()),
         removed_at  = NULL,
         updated_at  = NOW()
-    RETURNING (xmax = 0) AS inserted
+    RETURNING agent_id, role_id, (xmax = 0) AS inserted
 ),
 
--- ----------------------------
--- MARK REMOVED ROLES
--- ----------------------------
+-- 2. Mark Removed
 removed AS (
     UPDATE agent_role_mapping arm
     SET
@@ -63,12 +59,10 @@ removed AS (
           AND s.role_id  = arm.role_id
     )
     AND arm.status != 'removed'
-    RETURNING 1
+    RETURNING agent_id, role_id
 ),
 
--- ----------------------------
--- METRICS
--- ----------------------------
+-- 3. Calculate Metrics
 metrics AS (
     SELECT
         (SELECT COUNT(*) FROM upserted WHERE inserted)     AS rows_inserted,
@@ -76,16 +70,24 @@ metrics AS (
         (SELECT COUNT(*) FROM removed)                     AS rows_deleted
 ),
 
--- ----------------------------
--- FINISH TIMING
--- ----------------------------
-finished AS (
-    SELECT NOW() AS finished_at
+-- 4. Log History: Assigned (Only new insertions)
+hist_assigned AS (
+    INSERT INTO agent_role_history (agent_id, role_id, action)
+    SELECT agent_id, role_id, 'assigned'
+    FROM upserted
+    WHERE inserted = true
+    RETURNING 1
+),
+
+-- 5. Log History: Removed
+hist_removed AS (
+    INSERT INTO agent_role_history (agent_id, role_id, action)
+    SELECT agent_id, role_id, 'removed'
+    FROM removed
+    RETURNING 1
 )
 
--- ----------------------------
--- PIPELINE METRICS
--- ----------------------------
+-- 6. Log Pipeline Metrics & Trigger CTEs
 INSERT INTO pipeline_metrics (
     flow_run_id,
     task_name,
@@ -117,39 +119,11 @@ SELECT
     'success',
     NULL,
     c.started_at,
-    f.finished_at,
-    EXTRACT(EPOCH FROM f.finished_at - c.started_at)
+    clock_timestamp(),
+    EXTRACT(EPOCH FROM clock_timestamp() - c.started_at)
 FROM metrics m
 CROSS JOIN context c
-CROSS JOIN finished f;
-
--- ----------------------------
--- HISTORY: ASSIGNED
--- ----------------------------
-INSERT INTO agent_role_history (
-    agent_id,
-    role_id,
-    action
-)
-SELECT
-    agent_id,
-    role_id,
-    'assigned'
-FROM stg_agent_roles;
-
--- ----------------------------
--- HISTORY: REMOVED
--- ----------------------------
-INSERT INTO agent_role_history (
-    agent_id,
-    role_id,
-    action
-)
-SELECT
-    agent_id,
-    role_id,
-    'removed'
-FROM agent_role_mapping
-WHERE status = 'removed';
+CROSS JOIN (SELECT COUNT(*) FROM hist_assigned) ha
+CROSS JOIN (SELECT COUNT(*) FROM hist_removed) hr;
 
 COMMIT;

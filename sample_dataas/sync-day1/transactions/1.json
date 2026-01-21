@@ -1,0 +1,99 @@
+{
+  "results": [
+    {
+      "id": "VHJhbnNhY3Rpb246ODAwMg==",
+      "uuid": "tx_8002",
+      "amount": 100.5,
+      "transactionType": "AUTHORIZATION",
+      "userId": "VXNlcjoxMDAy",
+      "userName": "User Name",
+      "cardId": "Q2FyZDo0MDAy",
+      "merchantName": "Test Merchant",
+      "currencyData": {
+        "originalCurrencyCode": "USD",
+        "originalCurrencyAmount": "10050",
+        "exchangeRate": 1
+      },
+      "occurredTime": "2026-01-05T21:07:59.000+00:00",
+      "updatedTime": "2026-01-05T21:07:59.000+00:00",
+      "tags": [],
+      "customFields": []
+    },
+    {
+      "id": "VHJhbnNhY3Rpb246ODAwNA==",
+      "uuid": "tx_8004",
+      "amount": 100.5,
+      "transactionType": "AUTHORIZATION",
+      "userId": "VXNlcjoxMDA0",
+      "userName": "User Name",
+      "cardId": "Q2FyZDo0MDA0",
+      "merchantName": "Test Merchant",
+      "currencyData": {
+        "originalCurrencyCode": "USD",
+        "originalCurrencyAmount": "10050",
+        "exchangeRate": 1
+      },
+      "occurredTime": "2026-01-05T21:07:59.000+00:00",
+      "updatedTime": "2026-01-05T21:07:59.000+00:00",
+      "tags": [],
+      "customFields": []
+    },
+    {
+      "id": "VHJhbnNhY3Rpb246ODAwNg==",
+      "uuid": "tx_8006",
+      "amount": 100.5,
+      "transactionType": "AUTHORIZATION",
+      "userId": "VXNlcjoxMDA2",
+      "userName": "User Name",
+      "cardId": "Q2FyZDo0MDA2",
+      "merchantName": "Test Merchant",
+      "currencyData": {
+        "originalCurrencyCode": "USD",
+        "originalCurrencyAmount": "10050",
+        "exchangeRate": 1
+      },
+      "occurredTime": "2026-01-05T21:07:59.000+00:00",
+      "updatedTime": "2026-01-05T21:07:59.000+00:00",
+      "tags": [],
+      "customFields": []
+    },
+    {
+      "id": "VHJhbnNhY3Rpb246ODAwOA==",
+      "uuid": "tx_8008",
+      "amount": 100.5,
+      "transactionType": "AUTHORIZATION",
+      "userId": "VXNlcjoxMDA4",
+      "userName": "User Name",
+      "cardId": "Q2FyZDo0MDA4",
+      "merchantName": "Test Merchant",
+      "currencyData": {
+        "originalCurrencyCode": "USD",
+        "originalCurrencyAmount": "10050",
+        "exchangeRate": 1
+      },
+      "occurredTime": "2026-01-05T21:07:59.000+00:00",
+      "updatedTime": "2026-01-05T21:07:59.000+00:00",
+      "tags": [],
+      "customFields": []
+    },
+    {
+      "id": "VHJhbnNhY3Rpb246ODAxMA==",
+      "uuid": "tx_8010",
+      "amount": 100.5,
+      "transactionType": "AUTHORIZATION",
+      "userId": "VXNlcjoxMDEw",
+      "userName": "User Name",
+      "cardId": "Q2FyZDo0MDEw",
+      "merchantName": "Test Merchant",
+      "currencyData": {
+        "originalCurrencyCode": "USD",
+        "originalCurrencyAmount": "10050",
+        "exchangeRate": 1
+      },
+      "occurredTime": "2026-01-05T21:07:59.000+00:00",
+      "updatedTime": "2026-01-05T21:07:59.000+00:00",
+      "tags": [],
+      "customFields": []
+    }
+  ]
+}

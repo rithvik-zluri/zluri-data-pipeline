@@ -1,0 +1,20 @@
+[
+  {
+    "id": 5001,
+    "name": "Account Administrator",
+    "agent_type": 1,
+    "default": true
+  },
+  {
+    "id": 5002,
+    "name": "Agent",
+    "agent_type": 1,
+    "default": true
+  },
+  {
+    "id": 5003,
+    "name": "Ticket Collaborator",
+    "agent_type": 3,
+    "default": true
+  }
+]

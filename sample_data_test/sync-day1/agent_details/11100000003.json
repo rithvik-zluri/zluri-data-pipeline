@@ -1,0 +1,24 @@
+{
+  "id": 11100000003,
+  "org_agent_id": "org_11100000003",
+  "group_ids": [],
+  "org_group_ids": [],
+  "deactivated": false,
+  "agent_operational_status": "available",
+  "available": false,
+  "available_since": null,
+  "occasional": false,
+  "ticket_scope": 1,
+  "role_ids": [],
+  "skill_ids": [],
+  "type": "support_agent",
+  "last_active_at": null,
+  "created_at": null,
+  "updated_at": null,
+  "contact": {
+    "active": "yes",
+    "email": null,
+    "name": 12345
+  }
+}
+

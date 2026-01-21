@@ -1,0 +1,346 @@
+{
+  "results": [
+    {
+      "id": "Q2FyZDpURVNUX1ZBTElE",
+      "uuid": "crd_test_valid",
+      "name": "Valid Card",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "budgetId": "QnVkZ2V0OlRFU1RfVkFMSUQ=",
+      "budgetUuid": "bgt_test_valid",
+      "lastFour": "1234",
+      "validThru": "01/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 5000,
+      "currentPeriod": {
+        "limit": 5000,
+        "spent": 0
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpURVNUX1NUUklOR19CT09MRUFOUw==",
+      "uuid": "crd_string_booleans",
+      "name": "String Booleans Card",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "budgetId": "QnVkZ2V0OlRFU1RfVkFMSUQ=",
+      "budgetUuid": "bgt_test_valid",
+      "lastFour": "2345",
+      "validThru": "02/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": "true",
+      "recurring": "false",
+      "recurringLimit": 5000,
+      "currentPeriod": {
+        "limit": 5000,
+        "spent": 0
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpURVNUX01JU1NfQ1JFQVRFRF9USU1F",
+      "uuid": "crd_missing_created",
+      "name": "Missing createdTime",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "lastFour": "3456",
+      "validThru": "03/30",
+      "status": "ACTIVATED",
+      "type": "PHYSICAL",
+      "shareBudgetFunds": false,
+      "recurring": false,
+      "currentPeriod": {
+        "limit": 100,
+        "spent": 0
+      },
+      "createdTime": null,
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpURVNUX01JU1NfU1RBVFVTX1RZUEU=",
+      "uuid": "crd_missing_status_type",
+      "name": "Missing status/type",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "lastFour": "4567",
+      "validThru": "04/30",
+      "status": null,
+      "type": null,
+      "shareBudgetFunds": false,
+      "recurring": true,
+      "currentPeriod": {
+        "limit": 100,
+        "spent": 0
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpURVNUX05FR0FUSVZFX0xJTUlU",
+      "uuid": "crd_negative_limit",
+      "name": "Negative currentPeriod.limit",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "lastFour": "5678",
+      "validThru": "05/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_VENDOR",
+      "shareBudgetFunds": false,
+      "recurring": true,
+      "recurringLimit": -1,
+      "currentPeriod": {
+        "limit": -10,
+        "spent": -5
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpNQVJLRVRJTkdfMDE=",
+      "uuid": "crd_marketing_01",
+      "name": "Marketing Team Card 1",
+      "userId": "VXNlcjpTQVJBSA==",
+      "userUuid": "usr_sarah_johnson",
+      "budgetId": "QnVkZ2V0Ok1BUktFVElORw==",
+      "budgetUuid": "bgt_marketing",
+      "lastFour": "6789",
+      "validThru": "12/28",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 10000,
+      "currentPeriod": {
+        "limit": 10000,
+        "spent": 3500
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpNQVJLRVRJTkdfMDI=",
+      "uuid": "crd_marketing_02",
+      "name": "Marketing Team Card 2",
+      "userId": "VXNlcjpNSUNIQUVM",
+      "userUuid": "usr_michael_chen",
+      "budgetId": "QnVkZ2V0Ok1BUktFVElORw==",
+      "budgetUuid": "bgt_marketing",
+      "lastFour": "7890",
+      "validThru": "11/29",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 8000,
+      "currentPeriod": {
+        "limit": 8000,
+        "spent": 2100
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpFTkdJTkVFUklOR18wMQ==",
+      "uuid": "crd_engineering_01",
+      "name": "Engineering AWS Card",
+      "userId": "VXNlcjpKQU1FUw==",
+      "userUuid": "usr_james_wilson",
+      "budgetId": "QnVkZ2V0OkVOR0lORUVSSU5H",
+      "budgetUuid": "bgt_engineering",
+      "lastFour": "8901",
+      "validThru": "10/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_VENDOR",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 25000,
+      "currentPeriod": {
+        "limit": 25000,
+        "spent": 18000
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpFTkdJTkVFUklOR18wMg==",
+      "uuid": "crd_engineering_02",
+      "name": "Engineering Tools Card",
+      "userId": "VXNlcjpTT1BIQQ==",
+      "userUuid": "usr_sophia_lee",
+      "budgetId": "QnVkZ2V0OkVOR0lORUVSSU5H",
+      "budgetUuid": "bgt_engineering",
+      "lastFour": "9012",
+      "validThru": "09/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 15000,
+      "currentPeriod": {
+        "limit": 15000,
+        "spent": 8500
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpTQUxFU18wMQ==",
+      "uuid": "crd_sales_01",
+      "name": "Sales Travel Card",
+      "userId": "VXNlcjpPTElWSUE=",
+      "userUuid": "usr_olivia_martinez",
+      "budgetId": "QnVkZ2V0OlNBTEVT",
+      "budgetUuid": "bgt_sales",
+      "lastFour": "0123",
+      "validThru": "08/30",
+      "status": "ACTIVATED",
+      "type": "PHYSICAL",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 12000,
+      "currentPeriod": {
+        "limit": 12000,
+        "spent": 4500
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpTQUxFU18wMg==",
+      "uuid": "crd_sales_02",
+      "name": "Sales Expenses Card",
+      "userId": "VXNlcjpFTU1B",
+      "userUuid": "usr_emma_davis",
+      "budgetId": "QnVkZ2V0OlNBTEVT",
+      "budgetUuid": "bgt_sales",
+      "lastFour": "1234",
+      "validThru": "07/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 8000,
+      "currentPeriod": {
+        "limit": 8000,
+        "spent": 2800
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpJVF8wMQ==",
+      "uuid": "crd_it_01",
+      "name": "IT Infrastructure Card",
+      "userId": "VXNlcjpMSUFN",
+      "userUuid": "usr_liam_brown",
+      "budgetId": "QnVkZ2V0OklU",
+      "budgetUuid": "bgt_it",
+      "lastFour": "2345",
+      "validThru": "06/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_VENDOR",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 20000,
+      "currentPeriod": {
+        "limit": 20000,
+        "spent": 12000
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpPUEVSQVRJT05TXzAx",
+      "uuid": "crd_operations_01",
+      "name": "Operations General Card",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "budgetId": "QnVkZ2V0Ok9QRVJBVElPTlM=",
+      "budgetUuid": "bgt_operations",
+      "lastFour": "3456",
+      "validThru": "05/31",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 30000,
+      "currentPeriod": {
+        "limit": 30000,
+        "spent": 8500
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpIUl8wMQ==",
+      "uuid": "crd_hr_01",
+      "name": "HR Recruiting Card",
+      "userId": "VXNlcjpTQVJBSA==",
+      "userUuid": "usr_sarah_johnson",
+      "budgetId": "QnVkZ2V0OkhS",
+      "budgetUuid": "bgt_hr",
+      "lastFour": "4567",
+      "validThru": "04/30",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": true,
+      "recurring": true,
+      "recurringLimit": 5000,
+      "currentPeriod": {
+        "limit": 5000,
+        "spent": 1800
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpTVVNQRU5ERUQ=",
+      "uuid": "crd_suspended",
+      "name": "Suspended Card",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "budgetId": "QnVkZ2V0OlRFU1RfVkFMSUQ=",
+      "budgetUuid": "bgt_test_valid",
+      "lastFour": "5678",
+      "validThru": "03/30",
+      "status": "SUSPENDED",
+      "type": "VIRTUAL_MEMBER",
+      "shareBudgetFunds": false,
+      "recurring": false,
+      "currentPeriod": {
+        "limit": 1000,
+        "spent": 500
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDpDQU5DRUxFRA==",
+      "uuid": "crd_canceled",
+      "name": "Canceled Card",
+      "userId": "VXNlcjpURVNU",
+      "userUuid": "usr_test",
+      "budgetId": "QnVkZ2V0OlRFU1RfVkFMSUQ=",
+      "budgetUuid": "bgt_test_valid",
+      "lastFour": "6789",
+      "validThru": "02/28",
+      "status": "CANCELED",
+      "type": "PHYSICAL",
+      "shareBudgetFunds": false,
+      "recurring": false,
+      "currentPeriod": {
+        "limit": 500,
+        "spent": 500
+      },
+      "createdTime": "2026-01-01T00:00:00.000+00:00",
+      "updatedTime": "2026-01-02T00:00:00.000+00:00"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "results": [
+    {
+      "id": "Q2FyZDo0MDAy",
+      "uuid": "crd_4002",
+      "name": "Card for User 1002",
+      "userId": "VXNlcjoxMDAy",
+      "userUuid": "usr_1002",
+      "lastFour": "4002",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "recurring": true,
+      "createdTime": "2025-01-01T00:00:00.000+00:00",
+      "updatedTime": "2025-01-01T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDo0MDA0",
+      "uuid": "crd_4004",
+      "name": "Card for User 1004",
+      "userId": "VXNlcjoxMDA0",
+      "userUuid": "usr_1004",
+      "lastFour": "4004",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "recurring": true,
+      "createdTime": "2025-01-01T00:00:00.000+00:00",
+      "updatedTime": "2025-01-01T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDo0MDA2",
+      "uuid": "crd_4006",
+      "name": "Card for User 1006",
+      "userId": "VXNlcjoxMDA2",
+      "userUuid": "usr_1006",
+      "lastFour": "4006",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "recurring": true,
+      "createdTime": "2025-01-01T00:00:00.000+00:00",
+      "updatedTime": "2025-01-01T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDo0MDA4",
+      "uuid": "crd_4008",
+      "name": "Card for User 1008",
+      "userId": "VXNlcjoxMDA4",
+      "userUuid": "usr_1008",
+      "lastFour": "4008",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "recurring": true,
+      "createdTime": "2025-01-01T00:00:00.000+00:00",
+      "updatedTime": "2025-01-01T00:00:00.000+00:00"
+    },
+    {
+      "id": "Q2FyZDo0MDEw",
+      "uuid": "crd_4010",
+      "name": "Card for User 1010",
+      "userId": "VXNlcjoxMDEw",
+      "userUuid": "usr_1010",
+      "lastFour": "4010",
+      "status": "ACTIVATED",
+      "type": "VIRTUAL_MEMBER",
+      "recurring": true,
+      "createdTime": "2025-01-01T00:00:00.000+00:00",
+      "updatedTime": "2025-01-01T00:00:00.000+00:00"
+    }
+  ]
+}
