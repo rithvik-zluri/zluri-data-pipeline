@@ -17,12 +17,42 @@ def transform_transactions(raw_df, day: str):
     txn_json = F.to_json(F.col("txn"))
 
     # ---------------------------------------------------------
+    # VALID CURRENCIES (ISO 4217 subset)
+    # ---------------------------------------------------------
+    VALID_CURRENCIES = {
+        "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN",
+        "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BRL",
+        "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY",
+        "COP", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD",
+        "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GGP", "GHS",
+        "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK", "HTG", "HUF",
+        "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JEP", "JMD", "JOD",
+        "JPY", "KES", "KGS", "KHR", "KMF", "KPW", "KRW", "KWD", "KYD", "KZT",
+        "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD",
+        "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN",
+        "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK",
+        "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR",
+        "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLL", "SOS", "SPL", "SRD",
+        "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY",
+        "TTD", "TVD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VEF",
+        "VES", "VND", "VUV", "WST", "XAF", "XCD", "XDR", "XOF", "XPF", "YER",
+        "ZAR", "ZMW", "ZWD"
+    }
+
+    # ---------------------------------------------------------
     # SAFE FIELD EXTRACTION (NO SCHEMA ASSUMPTIONS)
     # ---------------------------------------------------------
-    amount_raw = F.coalesce(
+    # Extract as STRING first for validation
+    amount_str = F.coalesce(
         F.get_json_object(txn_json, "$.currencyData.originalCurrencyAmount"),
         F.get_json_object(txn_json, "$.originalCurrencyAmount")
-    ).cast(DoubleType())
+    )
+    
+    # Safe cast: Handle empty string explicitly to avoid CAST_INVALID_INPUT error
+    amount_raw = F.when(
+        (amount_str == "") | (amount_str.isNull()), 
+        F.lit(None)
+    ).otherwise(amount_str).cast(DoubleType())
 
     exponent = F.coalesce(
         F.get_json_object(txn_json, "$.currencyData.exponent"),
@@ -63,7 +93,11 @@ def transform_transactions(raw_df, day: str):
         original_currency.alias("original_currency"),
         payload_exchange_rate.alias("payload_exchange_rate"),
 
-        txn_json.alias("raw_payload")
+        txn_json.alias("raw_payload"),
+        
+        # Validation Flags
+        F.when(amount_str == "", True).otherwise(False).alias("is_amount_empty"),
+        F.when(original_currency.isin(VALID_CURRENCIES), True).otherwise(False).alias("is_currency_valid")
     )
 
     # ---------------------------------------------------------
@@ -95,11 +129,16 @@ def transform_transactions(raw_df, day: str):
     df = df.withColumn("fx_date", F.to_date("occurred_time"))
 
     # ---------------------------------------------------------
-    # PRE-COMPUTE FX MAP (API)
+    # PRE-COMPUTE FX MAP (API) - ONLY FOR VALID RECORDS
     # ---------------------------------------------------------
+    # Filter for API check: Has date, valid currency, not empty amount
     fx_pairs = (
         df.select("fx_date", "original_currency")
-        .filter(F.col("fx_date").isNotNull() & F.col("original_currency").isNotNull())
+        .filter(
+            F.col("fx_date").isNotNull() & 
+            F.col("is_currency_valid") & 
+            (~F.col("is_amount_empty"))
+        )
         .distinct()
         .collect()
     )
@@ -112,6 +151,7 @@ def transform_transactions(raw_df, day: str):
     }
 
     bc_fx = df.sparkSession.sparkContext.broadcast(fx_map)
+
 
     # ---------------------------------------------------------
     # FX UDF (API → PAYLOAD → MISSING)
@@ -160,6 +200,8 @@ def transform_transactions(raw_df, day: str):
         F.when(F.col("transaction_id").isNull(), "transaction_id is null")
         .when(F.col("transaction_uuid").isNull(), "transaction_uuid is null")
         .when(F.col("occurred_time").isNull(), "occurred_time is null")
+        .when(F.col("is_amount_empty"), "Currency amount cannot be empty")
+        .when(~F.col("is_currency_valid"), "Invalid currency code")
         .when(F.col("original_currency").isNull(), "original_currency is null")
         .when(F.col("original_amount").isNull() | (F.col("original_amount") == 0), "original_amount is null or zero")
         .when(F.col("exchange_rate").isNull(), "exchange_rate not found (api + payload)")

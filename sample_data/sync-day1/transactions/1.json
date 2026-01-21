@@ -34,32 +34,48 @@
           "selectedTagValues": [
             "Tooling, Equipment & Small Tools <$2.5k |61010"
           ],
-          "tagType": { "name": "1. Category" }
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["26-Manufacturing Enginering - CZV"],
-          "tagType": { "name": "2. Department" }
+          "selectedTagValues": [
+            "26-Manufacturing Enginering - CZV"
+          ],
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["No"],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "selectedTagValues": [
+            "No"
+          ],
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -133,8 +149,14 @@
       "fees": 0,
       "receiptStatus": "ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDoxMTQyMDMzNA==",
       "cardUuid": "crd_ebl2fm8ord23f7fl9c8ksa02es",
@@ -183,32 +205,46 @@
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "1. Category" }
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["57-Facilities"],
-          "tagType": { "name": "2. Department" }
+          "selectedTagValues": [
+            "57-Facilities"
+          ],
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -269,8 +305,14 @@
       "fees": 0,
       "receiptStatus": "NOT_ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDo5NTU1NzIw",
       "cardUuid": "crd_6edlg6a8ih5a952si5jo7nnvkk",
@@ -313,32 +355,46 @@
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "1. Category" }
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["14-Powertrain Engineering - CZV"],
-          "tagType": { "name": "2. Department" }
+          "selectedTagValues": [
+            "14-Powertrain Engineering - CZV"
+          ],
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -399,8 +455,14 @@
       "fees": 0,
       "receiptStatus": "NOT_ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDo5NTcyODkw",
       "cardUuid": "crd_js1hmav3g55i36npj9ikeu0lpg",
@@ -443,32 +505,44 @@
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "1. Category" }
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "2. Department" }
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -523,8 +597,14 @@
       "fees": 0,
       "receiptStatus": "NOT_ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDoxNDUxNzk2Mg==",
       "cardUuid": "crd_a9fi5kq9st0k5assop6m5j4p14",
@@ -569,32 +649,48 @@
           "selectedTagValues": [
             "Tooling, Equipment & Small Tools <$2.5k |61010"
           ],
-          "tagType": { "name": "1. Category" }
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["66-Electrical Engineering"],
-          "tagType": { "name": "2. Department" }
+          "selectedTagValues": [
+            "66-Electrical Engineering"
+          ],
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["Yes"],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "selectedTagValues": [
+            "Yes"
+          ],
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -668,8 +764,14 @@
       "fees": 0,
       "receiptStatus": "NOT_ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDoxNTc2MzM4NQ==",
       "cardUuid": "crd_hmbskbbkdh7dbak796vesb22g0",
@@ -711,33 +813,51 @@
       "tags": [
         {
           "isRequired": true,
-          "selectedTagValues": ["Machinery Repairs & Maintenance |82009"],
-          "tagType": { "name": "1. Category" }
+          "selectedTagValues": [
+            "Machinery Repairs & Maintenance |82009"
+          ],
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["67-Validation & Test"],
-          "tagType": { "name": "2. Department" }
+          "selectedTagValues": [
+            "67-Validation & Test"
+          ],
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["No"],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "selectedTagValues": [
+            "No"
+          ],
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -811,8 +931,14 @@
       "fees": 0,
       "receiptStatus": "ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDoxMzk2NzA2MA==",
       "cardUuid": "crd_5phagrca6l1af8gmqqrug25vjg",
@@ -861,32 +987,46 @@
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "1. Category" }
+          "tagType": {
+            "name": "1. Category"
+          }
         },
         {
           "isRequired": true,
-          "selectedTagValues": ["14-Powertrain Engineering - CZV"],
-          "tagType": { "name": "2. Department" }
+          "selectedTagValues": [
+            "14-Powertrain Engineering - CZV"
+          ],
+          "tagType": {
+            "name": "2. Department"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "3. Justification and Notes" }
+          "tagType": {
+            "name": "3. Justification and Notes"
+          }
         },
         {
           "isRequired": true,
           "selectedTagValues": [],
-          "tagType": { "name": "4. PO in Oracle (Y/N)?" }
+          "tagType": {
+            "name": "4. PO in Oracle (Y/N)?"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "5. PO #" }
+          "tagType": {
+            "name": "5. PO #"
+          }
         },
         {
           "isRequired": false,
           "selectedTagValues": [],
-          "tagType": { "name": "9. Invoice #" }
+          "tagType": {
+            "name": "9. Invoice #"
+          }
         }
       ],
       "customFields": [
@@ -947,8 +1087,14 @@
       "fees": 0,
       "receiptStatus": "NOT_ATTACHED",
       "reviewers": [
-        { "approverType": "BUDGET_OWNER", "status": "WAITING" },
-        { "approverType": "BOOKKEEPER", "status": "WAITING" }
+        {
+          "approverType": "BUDGET_OWNER",
+          "status": "WAITING"
+        },
+        {
+          "approverType": "BOOKKEEPER",
+          "status": "WAITING"
+        }
       ],
       "cardId": "Q2FyZDoxMjg3NTkxNw==",
       "cardUuid": "crd_5qe3d6kg7l5jrfvme2n7cshdo4",
@@ -957,8 +1103,55 @@
       "receiptSyncStatus": "NO_ATTACHMENTS",
       "merchantCategoryCode": "5411",
       "cardPresent": true,
-      "merchantLocation": { "city": "HINCKLEY", "country": "GB" },
+      "merchantLocation": {
+        "city": "HINCKLEY",
+        "country": "GB"
+      },
       "clearingReference": "0002346005625782776"
+    },
+    {
+      "id": "txn_invalid_currency_001",
+      "uuid": "txr_invalid_currency_uuid",
+      "childTransactionIds": [],
+      "childTransactionUuids": [],
+      "isLocked": false,
+      "isReconciled": false,
+      "transactionType": "AUTHORIZATION",
+      "userId": "usr_test_001",
+      "userUuid": "usr_uuid_test_001",
+      "userName": "Test User Invalid Currency",
+      "merchantName": "Test Merchant",
+      "currencyData": {
+        "exchangeRate": 1,
+        "exponent": 2,
+        "originalCurrencyAmount": "100",
+        "originalCurrencyCode": "ABC",
+        "symbol": "?"
+      },
+      "occurredTime": "2026-01-05T10:00:00.000+00:00",
+      "updatedTime": "2026-01-05T10:00:00.000+00:00"
+    },
+    {
+      "id": "txn_empty_amount_001",
+      "uuid": "txr_empty_amount_uuid",
+      "childTransactionIds": [],
+      "childTransactionUuids": [],
+      "isLocked": false,
+      "isReconciled": false,
+      "transactionType": "AUTHORIZATION",
+      "userId": "usr_test_002",
+      "userUuid": "usr_uuid_test_002",
+      "userName": "Test User Empty Amount",
+      "merchantName": "Test Merchant 2",
+      "currencyData": {
+        "exchangeRate": 1,
+        "exponent": 2,
+        "originalCurrencyAmount": "",
+        "originalCurrencyCode": "USD",
+        "symbol": "$"
+      },
+      "occurredTime": "2026-01-05T11:00:00.000+00:00",
+      "updatedTime": "2026-01-05T11:00:00.000+00:00"
     }
   ]
 }
