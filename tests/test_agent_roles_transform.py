@@ -1,6 +1,10 @@
 import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, LongType, StringType, IntegerType
+from pyspark.sql.types import (
+    StructType, StructField,
+    LongType, ArrayType
+)
+
 from src.pipelines.agent_roles.agent_roles_transform import transform_agent_roles
 
 
@@ -18,7 +22,7 @@ def spark():
 def agents_schema():
     return StructType([
         StructField("id", LongType(), True),
-        StructField("type", StringType(), True),
+        StructField("role_ids", ArrayType(LongType()), True),
     ])
 
 
@@ -26,155 +30,122 @@ def agents_schema():
 def roles_schema():
     return StructType([
         StructField("id", LongType(), True),
-        StructField("agent_type", IntegerType(), True),
     ])
 
 
 # --------------------------------------------------
-# 1. SUPPORT AGENT → agent_type = 1 → join success
+# 1. ALL ROLES VALID
 # --------------------------------------------------
-def test_transform_agent_roles_support_agent(spark, agents_schema, roles_schema):
+def test_transform_agent_roles_all_valid(spark, agents_schema, roles_schema):
     agents_data = [
-        (1, "support_agent")
+        (1, [10, 20]),
     ]
 
     roles_data = [
-        (10, 1)
+        (10,),
+        (20,),
     ]
 
     agents_df = spark.createDataFrame(agents_data, agents_schema)
     roles_df = spark.createDataFrame(roles_data, roles_schema)
 
-    result_df = transform_agent_roles(agents_df, roles_df)
+    valid_df, error_df = transform_agent_roles(agents_df, roles_df)
 
-    assert result_df.count() == 1
-
-    row = result_df.collect()[0]
-    assert row.agent_id == 1
-    assert row.role_id == 10
+    results = {(r.agent_id, r.role_id) for r in valid_df.collect()}
+    assert results == {(1, 10), (1, 20)}
+    assert error_df.count() == 0
 
 
 # --------------------------------------------------
-# 2. NON-SUPPORT AGENT → agent_type = 3 → join success
+# 2. SOME INVALID ROLES
 # --------------------------------------------------
-def test_transform_agent_roles_non_support_agent(spark, agents_schema, roles_schema):
+def test_transform_agent_roles_partial_invalid(spark, agents_schema, roles_schema):
     agents_data = [
-        (2, "collaborator")
+        (1, [10, 99]),
     ]
 
     roles_data = [
-        (20, 3)
+        (10,),
     ]
 
     agents_df = spark.createDataFrame(agents_data, agents_schema)
     roles_df = spark.createDataFrame(roles_data, roles_schema)
 
-    result_df = transform_agent_roles(agents_df, roles_df)
+    valid_df, error_df = transform_agent_roles(agents_df, roles_df)
 
-    assert result_df.count() == 1
+    assert {(r.agent_id, r.role_id) for r in valid_df.collect()} == {(1, 10)}
+    assert error_df.count() == 1
 
-    row = result_df.collect()[0]
-    assert row.agent_id == 2
-    assert row.role_id == 20
+    err = error_df.collect()[0]
+    assert err.error_type == "INVALID_ROLE_ID"
 
 
 # --------------------------------------------------
-# 3. NO MATCH → result empty
+# 3. ALL INVALID ROLES
 # --------------------------------------------------
-def test_transform_agent_roles_no_match(spark, agents_schema, roles_schema):
+def test_transform_agent_roles_all_invalid(spark, agents_schema, roles_schema):
     agents_data = [
-        (1, "support_agent")
+        (1, [99, 100]),
+    ]
+
+    roles_df = spark.createDataFrame([], roles_schema)
+    agents_df = spark.createDataFrame(agents_data, agents_schema)
+
+    valid_df, error_df = transform_agent_roles(agents_df, roles_df)
+
+    assert valid_df.count() == 0
+    assert error_df.count() == 2
+
+
+# --------------------------------------------------
+# 4. MULTIPLE AGENTS
+# --------------------------------------------------
+def test_transform_agent_roles_multiple_agents(spark, agents_schema, roles_schema):
+    agents_data = [
+        (1, [10]),
+        (2, [20, 30]),
     ]
 
     roles_data = [
-        (10, 3)  # mismatch
+        (10,),
+        (30,),
     ]
 
     agents_df = spark.createDataFrame(agents_data, agents_schema)
     roles_df = spark.createDataFrame(roles_data, roles_schema)
 
-    result_df = transform_agent_roles(agents_df, roles_df)
+    valid_df, error_df = transform_agent_roles(agents_df, roles_df)
 
-    assert result_df.count() == 0
-
-
-# --------------------------------------------------
-# 4. MIXED AGENTS → only matching join returned
-# --------------------------------------------------
-def test_transform_agent_roles_mixed_agents(spark, agents_schema, roles_schema):
-    agents_data = [
-        (1, "support_agent"),
-        (2, "collaborator"),
-        (3, "support_agent"),
-    ]
-
-    roles_data = [
-        (10, 1),
-        (20, 3),
-    ]
-
-    agents_df = spark.createDataFrame(agents_data, agents_schema)
-    roles_df = spark.createDataFrame(roles_data, roles_schema)
-
-    result_df = transform_agent_roles(agents_df, roles_df)
-
-    results = {(row.agent_id, row.role_id) for row in result_df.collect()}
-
-    assert results == {(1, 10), (2, 20), (3, 10)}
+    valid = {(r.agent_id, r.role_id) for r in valid_df.collect()}
+    assert valid == {(1, 10), (2, 30)}
+    assert error_df.count() == 1
 
 
 # --------------------------------------------------
-# 5. EMPTY AGENTS → empty result
+# 5. EMPTY AGENTS
 # --------------------------------------------------
 def test_transform_agent_roles_empty_agents(spark, agents_schema, roles_schema):
     agents_df = spark.createDataFrame([], agents_schema)
+    roles_df = spark.createDataFrame([(10,)], roles_schema)
 
-    roles_data = [
-        (10, 1),
-        (20, 3),
-    ]
-    roles_df = spark.createDataFrame(roles_data, roles_schema)
+    valid_df, error_df = transform_agent_roles(agents_df, roles_df)
 
-    result_df = transform_agent_roles(agents_df, roles_df)
-
-    assert result_df.count() == 0
+    assert valid_df.count() == 0
+    assert error_df.count() == 0
 
 
 # --------------------------------------------------
-# 6. EMPTY ROLES → empty result
-# --------------------------------------------------
-def test_transform_agent_roles_empty_roles(spark, agents_schema, roles_schema):
-    agents_data = [
-        (1, "support_agent"),
-        (2, "collaborator"),
-    ]
-    agents_df = spark.createDataFrame(agents_data, agents_schema)
-
-    roles_df = spark.createDataFrame([], roles_schema)
-
-    result_df = transform_agent_roles(agents_df, roles_df)
-
-    assert result_df.count() == 0
-
-
-# --------------------------------------------------
-# 7. FIELD CASTING + ALIAS VALIDATION
+# 6. FIELD TYPES
 # --------------------------------------------------
 def test_transform_agent_roles_field_types(spark, agents_schema, roles_schema):
-    agents_data = [
-        (5, "support_agent")
-    ]
-
-    roles_data = [
-        (50, 1)
-    ]
+    agents_data = [(5, [50])]
+    roles_data = [(50,)]
 
     agents_df = spark.createDataFrame(agents_data, agents_schema)
     roles_df = spark.createDataFrame(roles_data, roles_schema)
 
-    result_df = transform_agent_roles(agents_df, roles_df)
+    valid_df, _ = transform_agent_roles(agents_df, roles_df)
 
-    schema = result_df.schema
-
+    schema = valid_df.schema
     assert schema["agent_id"].dataType == LongType()
     assert schema["role_id"].dataType == LongType()
